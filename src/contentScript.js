@@ -577,8 +577,9 @@ function initAutoLoadPage(height = 1000) {
   })
 }
 
+// 暂时注释了，分页太多影响返回。
 function setHistory(url) {
-  history.pushState({}, '', new URL(url))
+  // history.pushState({}, '', new URL(url))
 }
 /**
  * 判断是否达成滚动条件
