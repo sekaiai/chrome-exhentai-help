@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Chrome Exhentai-help",
+  "name": "Chrome Exhentai Help",
   "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "version": "0.1.0",
   "description": "ExHentai Chrome Extension",
@@ -14,13 +14,12 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "ExHentai Help",
-    "default_popup": "popup.html"
+    "default_title": "ExHentai Help"
   },
   "permissions": ["storage", "downloads"],
   "content_scripts": [
     {
-      "matches": ["https://*.exhentai.org/*"],
+      "matches": ["https://*.exhentai.org/*", "https://*.e-hentai.org/*"],
       "run_at": "document_idle",
       "js": ["contentScript.js"]
     }

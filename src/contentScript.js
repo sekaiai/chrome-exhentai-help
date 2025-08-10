@@ -1,272 +1,601 @@
-'use strict'
+'use strict';
 
-// Content script file will run in the context of web page.
-// With content script you can manipulate the web pages using
-// Document Object Model (DOM).
-// You can also pass information to the parent extension.
-
-// We execute this script by making an entry in manifest.json file
-// under `content_scripts` property
-
-// For more information on Content Scripts,
-// See https://developer.chrome.com/extensions/content_scripts
-
-// Log `title` of current active web page
-const pageTitle = document.head.getElementsByTagName('title')?.[0]?.innerHTML
-console.log(`Page title is: '${pageTitle}' - evaluated by Chrome extension's 'contentScript.js' file`)
-
-// Communicate with background file by sending a message
-chrome.runtime.sendMessage(
-  {
-    type: 'GREETINGS',
-    payload: {
-      message: 'Hello, my name is Con. I am from ContentScript.'
-    }
+/**
+ * 文字常量定义 - 包含中英文版本
+ */
+const TEXT_CONSTANTS = {
+  zh: {
+    downloadAllTorrentBtn: '下载全部种子',
+    downloadAllTorrentTitle: '下载全部种子',
+    downloadAllImagesBtn: '下载所有图片',
+    downloadAllImagesTitle: '下载当前画廊的所有原图',
+    downloadModalTitle: '下载种子',
+    downloadCompleteMsg: '所有种子下载链接处理完毕，请刷新页面查看结果',
+    pageLabel: '#页码 ${currentPage}',
+    collectingLinks: '开始收集图片链接',
+    startFromPage: '从第 ${currentPage} 页开始，共 ${totalPages} 页',
+    collectingPage: '正在收集第 ${currentPage} 页...',
+    viewPage: '查看页面',
+    linksCollected: '链接收集完成，共获取到${imageLinks.size}张图片',
+    startDownloadImages: '开始下载图片',
+    downloadingFile: '正在下载：${fileName}',
+    downloadFailed: '下载失败：${link} <br> 错误：${error.message}',
+    partialDownloadComplete: '下载完成，共 ${errorLinks.length} 个文件下载失败】',
+    allDownloadComplete: '所有文件下载完成！',
+    downloadSelectionTitle: '下载选择',
+    downloadSelectionContent: '当前画廊有 ${torrentCount} 个种子文件，推荐下载种子文件（速度更快）。',
+    continueDownloadImages: '继续下载图片',
+    downloadTorrentFile: '下载种子文件',
+    loadingNextPage: '正在加载下一页...',
+    scrollToLoadMore: '滚动可加载更多内容',
+    loadFailedRetry: '加载失败，尝试滚动重试',
+    allContentLoaded: '已加载全部内容',
+    loadingNextImage: '正在加载下一张图片...',
+    allImagesLoaded: '已加载全部图片'
   },
-  response => {
-    console.log(response.message)
+  en: {
+    downloadAllTorrentBtn: 'Download All Torrents',
+    downloadAllTorrentTitle: 'Download all torrents',
+    downloadAllImagesBtn: 'Download All Images',
+    downloadAllImagesTitle: 'Download all original images in this gallery',
+    downloadModalTitle: 'Download Torrents',
+    downloadCompleteMsg: 'All torrent download links processed, please refresh the page to view results',
+    pageLabel: '#page ${currentPage}',
+    collectingLinks: 'Start collecting image links',
+    startFromPage: 'Starting from page ${currentPage}, total ${totalPages} pages',
+    collectingPage: 'Collecting page ${currentPage}...',
+    viewPage: 'View page',
+    linksCollected: 'Link collection completed, total ${imageLinks.size} images found',
+    startDownloadImages: 'Start downloading images',
+    downloadingFile: 'Downloading: ${fileName}',
+    downloadFailed: 'Download failed: ${link} <br> Error: ${error.message}',
+    partialDownloadComplete: 'Download completed, ${errorLinks.length} files failed to download',
+    allDownloadComplete: 'All files downloaded successfully!',
+    downloadSelectionTitle: 'Download Selection',
+    downloadSelectionContent: 'This gallery has ${torrentCount} torrent files. It is recommended to download the torrent (faster speed).',
+    continueDownloadImages: 'Continue downloading images',
+    downloadTorrentFile: 'Download torrent file',
+    loadingNextPage: 'Loading next page...',
+    scrollToLoadMore: 'Scroll to load more content',
+    loadFailedRetry: 'Load failed, try scrolling to retry',
+    allContentLoaded: 'All content loaded',
+    loadingNextImage: 'Loading next image...',
+    allImagesLoaded: 'All images loaded'
   }
-)
+};
 
-// Listen for message
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.type === 'COUNT') {
-    console.log(`Current count is ${request.payload.count}`)
-  }
+/**
+ * 获取当前语言（根据浏览器设置）
+ * @returns {string} 语言代码 'zh' 或 'en'
+ */
+const getCurrentLang = () => {
+  const browserLang = navigator.language || navigator.userLanguage;
+  return browserLang.includes('zh') ? 'zh' : 'en';
+};
 
-  // Send an empty response
-  // See https://github.com/mozilla/webextension-polyfill/issues/130#issuecomment-531531890
-  sendResponse({})
-  return true
-})
+// 当前语言
+const CURRENT_LANG = getCurrentLang();
+// 当前语言对应的文本
+const TEXT = TEXT_CONSTANTS[CURRENT_LANG];
 
-// 1. 监听页面滚动，返回是否达到底部。
-// #djumpbox 首页底部分页
-
-const doms = {
-  // 定义所有分页数据, https://exhentai.org/
+/**
+ * 页面DOM选择器常量配置
+ * 按不同页面类型分类存储选择器
+ */
+const PAGE_DOM_SELECTORS = {
+  // 首页相关选择器 (https://exhentai.org/)
   home: {
-    contentTable: '.gltm', //首页内容，表格显示
-    contentBody: '.itg', //首页内容body
-    torrentLink: '.gldown', //首页下载种子图标
-    bottomNext: '#dnext', //首页底部下一页
-    topNext: '#unext' //首页顶部下一页
+    contentTable: '.gltm',       // 首页内容表格
+    contentBody: '.itg',         // 首页内容主体
+    bottomNext: '#dnext',        // 底部下一页按钮
+    topNext: '#unext',           // 顶部下一页按钮
+    topPane: '#toppane',         // 顶部搜索块
+    searchNav: '.searchnav',      // 分页导航栏
+    torrentIcon: '.gldown > a',  // 下载种子icon
   },
-  // 图片详情列表, https://exhentai.org/g/2374482/33d2ec5afc/
-  g: {
-    topNav: '.ptt', //顶不分页
-    bottomNav: '.ptb', //底部分页
-    currentPage: '.ptds', //选中的分页
-    ctx: '.itg' //列表内容的容器
+  // 图片详情列表页选择器 (https://exhentai.org/g/2374482/33d2ec5afc/)
+  gallery: {
+    topNav: '.ptt',              // 顶部分页导航
+    bottomNav: '.ptb',           // 底部分页导航
+    currentPage: '.ptds',        // 当前选中页码
+    contentContainer: '#gdt',     // 列表内容容器
+    asidePane: '#gd5 a',        // 画廊详情页侧边栏
+    title: '#gn', //画廊标题
   },
-  //内容大图查看页, https://exhentai.org/s/d1c20fcadc/2374482-1
-  s: {
-    pt: '#i2',
-    pb: '#i4',
-    ps: '#next',
-    ctx: '#i3'
+  // 图片查看页选择器 (https://exhentai.org/s/d1c20fcadc/2374482-1)
+  imageView: {
+    pt: '#i2',                   // 顶部信息区
+    pb: '#i4',                   // 底部信息区
+    nextButton: '#next',         // 下一页按钮
+    contentContainer: '#i3',      // 图片容器
+    title: '#i2 > div', //图片标题
+    imageUrl: '#i6 > div:last-child a', //图片地址
+    navBar: '.sn', //翻页工具栏
+    pageNumber: '.sn > div', //翻页工具栏中的页码
   }
-}
+};
 
-// 需要加载下载按钮的页面
-const includePath = ['^/$', '^/watched', '^/favorites', '^/torrents', '^/uploader', '^/popular']
-// 需要自动加载下一页的页面
-const autoLoadPath = ['^/$', '^/watched$', '^/favorites.php$', '^/g/', '^/s/', '^/tag/']
+/**
+ * 需要加载下载按钮的页面路径正则常量
+ */
+const INCLUDE_DOWNLOAD_BUTTON_PATHS = [
+  '^/$',               // 首页
+  '^/watched',         // 已观看页面
+  '^/favorites',       // 收藏页面
+  '^/torrents',        // 种子页面
+  '^/uploader',        // 上传者页面
+  '^/popular'          // 热门页面
+];
 
-// 是否支持 GM_download方法, 主要检查白名单
-let isSupportGM_download = true
+/**
+ * 需要自动加载下一页的页面路径正则常量
+ */
+const AUTO_LOAD_PATHS = [
+  '^/$',               // 首页
+  '^/watched',         // 已观看页面
+  '^/favorites',       // 收藏页面
+  '^/g/',              // 画廊详情页
+  '^/s/',              // 图片详情页
+  '^/tag/'             // 标签页面
+];
 
-// ========== 批量下载 start ========================================
-// pending, downloading, pause
-let downloadAllStatus = 'pending'
-createDownloadButton()
-// 创建批量下载按钮
-function createDownloadButton() {
-  const { pathname } = document.location
 
-  if (includePath.some(e => new RegExp(e).test(pathname))) {
-    const btn = document.createElement('input')
-    btn.type = 'button'
-    btn.id = 'btn-download'
-    btn.value = 'Download All Torrents'
-    btn.addEventListener('click', downloadAllTorrents)
+/**
+ * 工具类 - 提供通用辅助方法
+ */
+class Utils {
+  /**
+   * 异步延迟函数
+   * @param {number} timer - 延迟毫秒数，默认3000ms
+   * @returns {Promise} 延迟后的Promise
+   */
+  static asyncTimeout(timer = 3000) {
+    return new Promise(resolve => setTimeout(resolve, timer));
+  }
 
-    const form = document.querySelector('form')
+  /**
+   * 向页面插入CSS样式
+   * @param {string} css - CSS代码
+   */
+  static insertStyle(css) {
+    const styleElement = document.createElement('style');
+    styleElement.textContent = css;
+    document.head.appendChild(styleElement);
+  }
 
-    if (form) {
-      const buttons = form.querySelectorAll("input[type='button']")
-      if (!buttons.length) {
-        return
-      }
-      const dom = buttons[buttons.length - 1]
-      dom.parentNode.insertBefore(btn, dom.nextElementSibling)
+  /**
+   * 创建带内容的元素
+   * @param {string} html - HTML内容
+   * @param {string} tag - 元素标签，默认p
+   * @returns {HTMLElement} 创建的元素
+   */
+  static createElementWithContent(html, tag = 'p') {
+    const element = document.createElement(tag);
+    element.innerHTML = html;
+    return element;
+  }
+
+  /**
+   * 获取指定URL的页面内容
+   * @param {string} url - 页面URL
+   * @returns {Promise<Document>} 页面DOM对象
+   */
+  static fetchPageContent(url) {
+    if (!url) return document
+    return new Promise((resolve, reject) => {
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+          return response.text();
+        })
+        .then(html => {
+          const tempDoc = document.createElement('html');
+          tempDoc.innerHTML = html;
+          resolve(tempDoc);
+        })
+        .catch(error => reject(error));
+    });
+  }
+
+  /**
+   * 通过a标签下载文件（备用方法）
+   * @param {string|Blob} href - 下载链接或Blob对象
+   * @param {string} name - 文件名
+   */
+  static downloadViaLink(href, name = '') {
+    const link = document.createElement('a');
+    link.download = name;
+
+    if (typeof href === 'string') {
+      link.href = href;
     } else {
-      const dom = document.querySelector('#toppane')
-      const div = document.createElement('div')
-      div.style = 'text-align:center'
-      div.appendChild(btn)
-      dom.append(div)
+      link.href = URL.createObjectURL(href);
     }
+
+    link.click();
+    URL.revokeObjectURL(link.href);  // 释放资源
   }
 }
 
-// 开始批量下载种子
-async function downloadAllTorrents() {
-  openModal({ title: `下载种子`, content: true })
 
-  const links = new Set()
-
-  // 1. 先获取本页所有连接
-  await selectorAllTorrentLinks(document, links)
-
-  let nextPage = document.querySelector('#unext')
-  while (nextPage) {
-    let url = nextPage.href
-    let page = nextPage.innerText
-
-    _popup.appendContent(`【获取第 ${page} 页数据... <a target='_blank' href='${url}'>${url}</a>`)
-
-    const ctx = await fetchContent(url)
-    await selectorAllTorrentLinks(ctx, links)
-
-    nextPage = ctx.querySelector('#unext')
+/**
+ * 模态框管理器 - 处理模态框的创建、显示和关闭
+ */
+class ModalManager {
+  constructor() {
+    this.popup = {};  // 存储模态框相关DOM元素
   }
-  _popup.appendContent(`【下载完毕，请刷新页面】`)
+
+  /**
+   * 打开模态框
+   * @param {Object} options - 模态框配置
+   * @param {string|HTMLElement} options.title - 标题
+   * @param {string|HTMLElement|boolean} options.content - 内容，true表示需要动态添加
+   * @param {string|HTMLElement|Array} options.footer - 底部内容
+   * @param {boolean} options.maskClose - 点击遮罩是否关闭
+   */
+  openModal(options) {
+    // 清除现有模态框内容
+    if (this.popup.body) {
+      this.popup.body.innerHTML = '';
+      delete this.popup.title;
+      delete this.popup.content;
+      delete this.popup.footer;
+    } else {
+      // 创建模态框基本结构
+      const overlay = document.createElement('div');
+      overlay.style = `
+        background: rgba(0,0,0,.7);
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 9999;
+      `;
+
+      const modalBody = document.createElement('div');
+      modalBody.id = 'popup-body';
+      modalBody.style = `
+        position: absolute;
+        background: #363940;
+        border-radius: 8px;
+        z-index: 10000;
+        padding: 14px 20px;
+        font-size: 16px;
+        min-width: 400px;
+        min-height: 120px;
+        box-shadow: 0 0 12px rgba(0,0,0,0.8);
+        left: 50%;
+        top: 30%;
+        transform: translate(-50%, -30%);
+        text-align: left;
+        color: #fff;
+      `;
+
+      // 阻止模态框内部点击事件冒泡到遮罩
+      modalBody.addEventListener('click', e => e.stopPropagation(), false);
+
+      this.popup.overlay = overlay;
+      this.popup.body = modalBody;
+    }
+
+    // 配置遮罩点击关闭功能
+    if (options.maskClose) {
+      this.popup.overlay.addEventListener('click', () => this.closeModal(), false);
+    } else {
+      this.popup.overlay.removeEventListener('click', () => this.closeModal(), false);
+    }
+
+    // 添加标题
+    if (options.title) {
+      this.popup.title = document.createElement('h3');
+      this.popup.title.style.margin = '0 0 15px 0';
+      this.popup.title.style.color = '#fff';
+
+      if (typeof options.title === 'string') {
+        this.popup.title.innerHTML = options.title;
+      } else {
+        this.popup.title.appendChild(options.title);
+      }
+
+      this.popup.body.appendChild(this.popup.title);
+    }
+
+    // 添加内容区域
+    if (options.content) {
+      this.popup.content = document.createElement('div');
+      this.popup.content.style = `
+        padding-bottom: 20px;
+        overflow-y: auto;
+        max-height: 60vh;
+        color: #ddd;
+      `;
+
+      // 处理内容
+      if (typeof options.content === 'string') {
+        this.popup.content.innerHTML = options.content;
+      } else if (options.content !== true) {
+        this.popup.content.appendChild(options.content);
+      }
+
+      this.popup.body.appendChild(this.popup.content);
+
+      // 添加动态内容追加方法
+      this.popup.appendContent = (...args) => {
+        const elements = args.map(content => Utils.createElementWithContent(content));
+        this.popup.content.append(...elements);
+        // 自动滚动到底部
+        this.popup.content.scrollTop = this.popup.content.scrollHeight;
+      };
+    }
+
+    // 添加底部内容
+    if (options.footer) {
+      this.popup.footer = document.createElement('div');
+      this.popup.footer.style = 'display: flex; padding-top: 10px; gap: 10px; justify-content: center';
+
+      if (Array.isArray(options.footer)) {
+        options.footer.forEach(item => this.popup.footer.appendChild(item));
+      } else {
+        this.popup.footer.appendChild(options.footer);
+      }
+
+      this.popup.body.appendChild(this.popup.footer);
+    }
+
+    // 显示模态框
+    this.popup.overlay.appendChild(this.popup.body);
+    document.body.appendChild(this.popup.overlay);
+
+    return this.popup;
+  }
+
+  /**
+   * 关闭模态框
+   */
+  closeModal() {
+    if (this.popup.overlay && document.body.contains(this.popup.overlay)) {
+      document.body.removeChild(this.popup.overlay);
+    }
+    this.popup = {};  // 清空引用
+  }
+
+  /**
+   * 获取当前模态框实例
+   */
+  getCurrentPopup() {
+    return this.popup;
+  }
 }
 
-async function selectorAllTorrentLinks(dom, links) {
-  // dom?.querySelectorAll(doms.homeTorrentDownLink).forEach(e => e.children[0]?.href && links.add(e.children[0]?.href))
 
-  //  1.正在下载当前页
-  // _popup.appendContent(`<b>【开始下载】</b>`)
-
-  // 获取所有下载链接(打开iframe的链接)
-  let urls = []
-
-  // 种子下载页面没有下载图标
-  const inTorrentsPage = /^\/torrents/.test(location.pathname)
-  if (inTorrentsPage) {
-    urls = Array.from(dom.querySelector('.itg').querySelectorAll('a[rel="nofollow"]')).map(e =>
-      e.href?.replace(/&gtid=\d+/, '')
-    )
-  } else {
-    urls = Array.from(dom.querySelector('.itg').querySelectorAll('.gldown > a')).map(e => e?.href)
+/**
+ * 种子下载管理器 - 处理种子批量下载功能
+ */
+class TorrentDownloader {
+  constructor(modalManager) {
+    this.status = 'pending';  // 状态: pending, downloading, pause
+    this.modalManager = modalManager;
+    this.init();
   }
 
-  const iframe = createIframe('iframe-download-all')
-  for (let i = 0; i < urls.length; i++) {
-    if (urls[i]) {
-      await onLoadIframe(iframe, urls[i])
+  /**
+   * 初始化种子下载功能
+   */
+  init() {
+    this.createDownloadButton();
+  }
 
-      // 获取页面所有种子列表(每个种子对应一个form)
-      const forms = iframe.contentDocument.querySelectorAll('form')
+  /**
+   * 创建批量下载按钮并添加到页面
+   */
+  createDownloadButton() {
+    const { pathname } = document.location;
 
-      // 选取出时间最新的种子
-      let latest = { date: 0 }
-      // 获取文件名
-      latest.title = iframe.contentDocument.querySelector('h1').innerText
-      _popup.appendContent(`> ${latest.title}`)
+    // 检查当前页面是否需要添加下载按钮
+    if (INCLUDE_DOWNLOAD_BUTTON_PATHS.some(pattern => new RegExp(pattern).test(pathname))) {
+      const downloadBtn = document.createElement('input');
+      downloadBtn.type = 'button';
+      downloadBtn.id = 'btn-download';
+      downloadBtn.value = TEXT.downloadAllTorrentBtn;
+      downloadBtn.title = TEXT.downloadAllTorrentTitle;
+      downloadBtn.addEventListener('click', () => this.downloadAllTorrents());
 
-      forms.forEach(e => {
-        // 第一个td就是时间
-        let dateTxt = e.querySelector('td > span:last-child')?.textContent
-        let dateTime = new Date(dateTxt).getTime()
-        // 只有一个a标签
-        let a = e.querySelector('a')
-        // 选取时间最新的
-        if (a && latest.date < dateTime) {
-          latest = {
-            date: dateTime,
-            torrent: a.href,
-            name: a.innerText + '.torrent'
-          }
+      // 尝试在表单中插入按钮
+      const formElement = document.querySelector('form');
+      if (formElement) {
+        const existingButtons = formElement.querySelectorAll("input[type='button']");
+        if (existingButtons.length) {
+          const lastButton = existingButtons[existingButtons.length - 1];
+          lastButton.parentNode.insertBefore(downloadBtn, lastButton.nextElementSibling);
         }
-      })
-
-      /**
-       * 开始下载种子, 记录每个种子的下载情况
-       * 下载链接好像是固定的, 那么可以先把下载链接导出来, 然后在异步或多线程一个慢慢下载。
-       * 文件名
-       * 内容链接
-       * 下载状态
-       */
-      // 获取链接
-      // https://exhentai.org/g/2294780/b1432b108f/
-      // https://exhentai.org/gallerytorrents.php?gid=2294780&t=b1432b108f
-      const [, gid, , t] = iframe.contentDocument.location.search.match(/([0-9A-Za-z]+)/g)
-      latest.link = `https://exhentai.org/g/${gid}/${t}`
-      // console.log(latest)
-
-      downloadFile(latest.torrent, latest.name)
-      await asyncTimeout(1000)
+      } else {
+        // 表单不存在时，在顶部面板添加按钮
+        const topPane = document.querySelector(PAGE_DOM_SELECTORS.home.topPane);
+        if (topPane) {
+          const buttonContainer = document.createElement('div');
+          buttonContainer.style = 'text-align:center';
+          buttonContainer.appendChild(downloadBtn);
+          topPane.appendChild(buttonContainer);
+        }
+      }
     }
   }
-}
 
-function downloadFile(url, name = '') {
-  chrome.runtime.sendMessage({
-    type: 'DOWNLOAD',
-    payload: { url, name }
-  })
+  /**
+   * 批量下载所有种子的主函数
+   */
+  async downloadAllTorrents() {
+    // 打开下载进度模态框
+    const popup = this.modalManager.openModal({
+      title: TEXT.downloadModalTitle,
+      content: true
+    });
 
-  // downloadALink(url, name)
-}
+    let currentPage = 1;
+    let currentDom = document; // 当前页面DOM引用，初始为当前文档
 
-// 通过a标签下载文件
-function downloadALink(href, name = '') {
-  let link = document.createElement('a')
-  link.download = name
+    // 循环处理所有分页，直到没有下一页
+    while (currentDom) {
+      popup.appendContent(`<small>${TEXT.pageLabel.replace('${currentPage}', currentPage)}</small>`);
 
-  if (typeof href === 'string') {
-    link.href = href
-  } else {
-    link.href = URL.createObjectURL(href)
-  }
-  link.click()
-  URL.revokeObjectURL(link)
-}
+      // 收集当前页的种子链接
+      await this.collectTorrentLinks(currentDom, popup);
 
-function asyncTimeout(timer = 3000) {
-  return new Promise(resolve => setTimeout(() => resolve(), timer))
-}
+      // 获取下一页元素及链接
+      const nextPageElement = currentDom.querySelector(PAGE_DOM_SELECTORS.home.topNext);
+      const nextPageUrl = nextPageElement?.href;
 
-// 加载iframe, 加载完毕后返回
-function onLoadIframe(iframe, src) {
-  return new Promise(resolve => {
-    iframe.src = src
-    iframe.onload = () => resolve()
-  })
-}
-// 在页面上创建一个iframe
-function createIframe(id) {
-  let iframe = document.querySelector(`#${id}`)
-  if (iframe) {
-    return iframe
+      // 准备处理下一页或结束循环
+      if (nextPageUrl) {
+        currentDom = await Utils.fetchPageContent(nextPageUrl);
+        currentPage++;
+      } else {
+        currentDom = null; // 无下一页时终止循环
+      }
+    }
+
+    popup.appendContent(TEXT.downloadCompleteMsg);
   }
 
-  iframe = document.createElement('iframe')
-  iframe.id = id
-  iframe.width = 0
-  iframe.height = 0
-  iframe.style.display = 'none'
-  document.body.append(iframe)
-  return iframe
+  /**
+   * 从指定DOM中收集所有种子下载链接
+   * @param {Document} dom - 页面DOM对象
+   * @param {Object} popup - 模态框对象
+   */
+  async collectTorrentLinks(dom, popup) {
+    let urls = [];
+    const isTorrentPage = location.pathname.startsWith('/torrents');
+
+    // 种子页面和普通页面的链接选择方式不同
+    if (isTorrentPage) {
+      urls = Array.from(dom.querySelector(PAGE_DOM_SELECTORS.home.contentBody).querySelectorAll('a[rel="nofollow"]'))
+        .map(link => link.href?.replace(/&gtid=\d+/, ''));
+    } else {
+      urls = Array.from(dom.querySelector(PAGE_DOM_SELECTORS.home.contentBody).querySelectorAll(PAGE_DOM_SELECTORS.home.torrentIcon))
+        .map(link => link?.href);
+    }
+
+    // 创建隐藏的iframe用于解析种子页面
+    const iframe = this.createIframe('iframe-download-all');
+    for (let i = 0; i < urls.length; i++) {
+      if (urls[i]) {
+        // 加载iframe并等待完成
+        await this.loadIframeContent(iframe, urls[i]);
+
+        // 获取种子页面中的所有表单（每个表单对应一个种子）
+        const torrentForms = iframe.contentDocument.querySelectorAll('form');
+
+        // 获取当前种子页面标题
+        const pageTitle = iframe.contentDocument.querySelector('h1').innerText;
+        popup.appendContent(`<li>${pageTitle}</li>`);
+
+        // 筛选最新的种子（按时间排序）
+        let latestTorrent = { date: 0 };
+        torrentForms.forEach(form => {
+          // 获取种子时间
+          const dateText = form.querySelector('td > span:last-child')?.textContent;
+          const dateTime = new Date(dateText).getTime();
+
+          // 获取种子下载链接
+          const torrentLink = form.querySelector('a');
+
+          // 更新最新种子信息
+          if (torrentLink && latestTorrent.date < dateTime) {
+            latestTorrent = {
+              date: dateTime,
+              torrentUrl: torrentLink.href,
+              fileName: torrentLink.innerText + '.torrent'
+            };
+          }
+        });
+
+        // 提取画廊链接信息
+        const [, galleryId, , galleryToken] = iframe.contentDocument.location.search.match(/([0-9A-Za-z]+)/g) || [];
+        latestTorrent.galleryLink = `https://exhentai.org/g/${galleryId}/${galleryToken}`;
+
+        // 发送下载请求
+        this.downloadFile(latestTorrent.torrentUrl, latestTorrent.fileName);
+
+        // 避免请求过于频繁
+        await Utils.asyncTimeout(1000);
+      }
+    }
+  }
+
+  /**
+   * 发送下载请求到扩展主程序
+   * @param {string} url - 下载链接
+   * @param {string} filename - 文件名
+   */
+  downloadFile(url, filename = '') {
+    chrome.runtime.sendMessage({
+      type: 'DOWNLOAD',
+      payload: { url, filename }
+    });
+  }
+
+  /**
+   * 加载iframe内容并等待完成
+   * @param {HTMLIFrameElement} iframe - iframe元素
+   * @param {string} src - 要加载的URL
+   * @returns {Promise} 加载完成的Promise
+   */
+  loadIframeContent(iframe, src) {
+    return new Promise(resolve => {
+      iframe.src = src;
+      iframe.onload = () => resolve();
+    });
+  }
+
+  /**
+   * 创建隐藏的iframe用于页面解析
+   * @param {string} id - iframe的ID
+   * @returns {HTMLIFrameElement} 创建的iframe元素
+   */
+  createIframe(id) {
+    let iframe = document.querySelector(`#${id}`);
+    if (iframe) {
+      return iframe;
+    }
+
+    iframe = document.createElement('iframe');
+    iframe.id = id;
+    iframe.width = 0;
+    iframe.height = 0;
+    iframe.style.display = 'none';  // 隐藏iframe
+    document.body.appendChild(iframe);
+    return iframe;
+  }
 }
-// ========== 批量下载 end ========================================
 
-// ========== 批量下载原图 end ========================================
 
-// 详情页缩略图列表
-if (new RegExp('^/g/').test(location.pathname)) {
-  initDownloadFullImage()
-}
+/**
+ * 图片下载管理器 - 处理原图批量下载功能
+ */
+class ImageDownloader {
+  constructor(modalManager) {
+    this.modalManager = modalManager;
+    this.init();
+  }
 
-// 设置自动加载
-function toggleAutoLoad(page) {}
+  /**
+   * 初始化图片下载功能
+   */
+  init() {
+    // 在画廊详情页（/g/路径）初始化下载原图功能
+    if (new RegExp('^/g/').test(location.pathname)) {
+      this.initDownloadFullImage();
+    }
+  }
 
-// 插入按钮
-function initDownloadFullImage() {
-  const css = `
+  /**
+   * 初始化下载原图功能，添加下载按钮到页面
+   */
+  initDownloadFullImage() {
+    // 添加自定义按钮样式
+    const customCss = `
       .custom-btn{
         width: auto !important;
         cursor: pointer;
@@ -277,509 +606,440 @@ function initDownloadFullImage() {
         font-size:10pt;
       }
       .custom-btn + .custom-btn{margin-left: 12px;}
-    `
-  insertStyle(css)
+    `;
+    Utils.insertStyle(customCss);
 
-  const btn = document.createElement('div')
-  btn.setAttribute('class', 'tha nosel custom-btn')
-  btn.innerText = 'Download All Image'
-  btn.title = '下载全部图片'
-  // btn.setAttribute('style', 'position: absolute; right: 135px;')
-  btn.addEventListener('click', handleDownloadFullImage, false)
+    // 创建下载按钮
+    const downloadBtn = document.createElement('div');
+    downloadBtn.className = 'tha nosel custom-btn';
+    downloadBtn.innerText = TEXT.downloadAllImagesBtn;
+    downloadBtn.title = TEXT.downloadAllImagesTitle;
+    downloadBtn.addEventListener('click', () => this.handleDownloadFullImage(), false);
 
-  // // 自动加载开个
-  // const btnAuto = document.createElement('div')
-  // btnAuto.setAttribute('class', 'tha nosel custom-btn')
-  // btnAuto.innerText = 'Auto Page ON'
-  // btnAuto.title = '自动加载已关闭（点击开启）'
-  // // btnAuto.setAttribute('style', 'position: absolute; left: 262px;')
-  // btnAuto.addEventListener('click', toggleAutoLoad, false)
+    // 创建按钮容器
+    const buttonContainer = document.createElement('div');
+    buttonContainer.style = 'text-align:center; margin-bottom: 5px';
+    buttonContainer.appendChild(downloadBtn);
 
-  const box = document.createElement('div')
-  box.style = 'text-align:center; margin-top: 4px'
-  box.append(btn)
-
-  document.querySelector('.gtb')?.appendChild(box)
-}
-
-// 全局
-let _popup = {}
-// param = {title, content, footer}
-function openModal(param) {
-  if (_popup.body) {
-    delete _popup.title
-    delete _popup.content
-    delete _popup.footer
-
-    _popup.body.innerHTML = ''
-  } else {
-    // 创建容器
-    const overlay = document.createElement('div')
-    overlay.style = `
-        background: rgba(0,0,0,.7);
-        position: fixed;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        right: 0;
-        z-index: 9;
-      `
-    const body = document.createElement('div')
-    body.id = 'popup-body'
-    body.style = `
-        position: absolute;
-        background: #363940;
-        border-radius: 8px;
-        z-index: 999;
-        padding: 14px 20px;
-        font-size: 16px;
-        min-width: 400px;
-        min-height: 120px;
-        box-shadow: rgb(0 0 0) 0px 0px 12px 0px;
-        left: 50%;
-        top: 30%;
-        transform: translate(-50%, -30%);
-        text-align: left;
-      `
-    _popup.overlay = overlay
-    _popup.body = body
-    _popup.body.addEventListener(
-      'click',
-      function (e) {
-        e.stopPropagation()
-      },
-      false
-    )
+    // 将按钮插入到顶部导航上方
+    const topNav = document.querySelector(PAGE_DOM_SELECTORS.gallery.topNav);
+    topNav?.parentNode?.insertBefore(buttonContainer, topNav);
   }
 
-  if (param.maskClose) {
-    _popup.overlay.addEventListener('click', closeModal, false)
-  } else {
-    _popup.overlay.removeEventListener('click', closeModal, false)
-  }
+  /**
+   * 处理下载原图的点击事件
+   */
+  async handleDownloadFullImage() {
+    // 检查是否有可用的种子文件
+    const torrentLinks = Array.from(document.querySelectorAll(PAGE_DOM_SELECTORS.gallery.asidePane));
+    const torrentLink = torrentLinks.find(link => /torrent.*\d+/i.test(link.innerText));
+    const torrentCount = torrentLink ? parseInt(torrentLink.innerText.match(/\d+/)[0], 10) : 0;
 
-  // 插入标题容器
-  if (param.title) {
-    _popup.title = document.createElement('h3')
+    if (torrentCount > 0) {
+      // 有种子文件时，显示选择对话框
+      const imageBtn = document.createElement('div');
+      imageBtn.innerText = TEXT.continueDownloadImages;
+      imageBtn.className = 'tha nosel custom-btn';
+      imageBtn.addEventListener('click', () => this.downloadFullImage(), false);
 
-    if (typeof param.title === 'string') {
-      _popup.title.innerHTML = param.title
-    }
+      const torrentBtn = document.createElement('div');
+      torrentBtn.innerText = TEXT.downloadTorrentFile;
+      torrentBtn.className = 'ths nosel custom-btn';
+      torrentBtn.addEventListener('click', () => {
+        torrentLink.click();
+        this.modalManager.closeModal();
+      }, false);
 
-    _popup.body.appendChild(_popup.title)
-  }
-
-  // 插入内容容器
-  if (param.content) {
-    _popup.content = document.createElement('div')
-    _popup.content.style = `padding-bottom: 20px;
-        overflow-y: auto;
-        max-height: 80vh;
-        `
-    if (typeof param.content === 'string') {
-      _popup.content.innerHTML = param.content
-    } else if (typeof param.content === 'object') {
-      _popup.content.append(param.content)
-    }
-    _popup.body.appendChild(_popup.content)
-
-    _popup.appendContent = function () {
-      const els = [...arguments].map(e => createP(e))
-      // console.log(els, _popup)
-      _popup.content.append(...els)
-      _popup.content.scrollTop = _popup.content.scrollHeight
+      this.modalManager.openModal({
+        maskClose: true,
+        title: TEXT.downloadSelectionTitle,
+        content: TEXT.downloadSelectionContent.replace('${torrentCount}', torrentCount),
+        footer: [imageBtn, torrentBtn]
+      });
+    } else {
+      // 没有种子文件，直接下载图片
+      this.downloadFullImage();
     }
   }
 
-  // 插入脚部
-  if (param.footer) {
-    _popup.footer = document.createElement('div')
-    _popup.footer.style = `display: flex; padding-top: 10px;`
-    if (typeof param.footer === 'object') {
-      Array.isArray(param.footer) ? _popup.footer.append(...param.footer) : _popup.footer.append(param.footer)
-    }
-    _popup.body.appendChild(_popup.footer)
-  }
+  /**
+   * 下载所有原图的主函数
+   */
+  async downloadFullImage() {
+    // 打开下载进度模态框
+    const popup = this.modalManager.openModal({
+      title: `${TEXT.downloadAllImagesBtn}：${document.querySelector(PAGE_DOM_SELECTORS.gallery.title)?.innerText || '未知画廊'}`,
+      content: true
+    });
 
-  _popup.overlay.appendChild(_popup.body)
-  document.body.appendChild(_popup.overlay)
-}
+    const errorLinks = [];  // 存储下载失败的链接
+    // 1. 获取所有图片详情页链接
+    const imageLinks = await this.collectImageLinks(popup);
+    popup.appendContent(
+      TEXT.linksCollected.replace('${imageLinks.size}', imageLinks.size), 
+      `<b>${TEXT.startDownloadImages}</b>`
+    );
 
-function closeModal() {
-  document.body.removeChild(_popup.overlay)
-  _popup = {}
-}
+    // 2. 依次下载每张图片
+    for (const link of imageLinks) {
+      try {
+        const pageDom = await Utils.fetchPageContent(link);
+        // 获取图片标题和文件名
+        const titleElement = Array.from(pageDom.querySelectorAll(PAGE_DOM_SELECTORS.imageView.title)).pop();
+        const titleText = titleElement?.innerText || '未知图片';
+        const galleryId = location.pathname.match(/g\/(\d+)/)?.[1] || 'unknown';
+        const fileName = `${galleryId} - ${titleText.split('::')[0].replace(/ /g, '')}.jpg`;
 
-function insertStyle(css) {
-  const style = document.createElement('style')
-  style.textContent = css
-  document.head.appendChild(style)
-}
+        // 获取原图链接
+        const imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageUrl)?.href;
 
-// 点击下载按钮触发
-async function handleDownloadFullImage() {
-  // 1. 检查是否有种子文件
-  const torrentLink = Array.from(document.querySelectorAll('#gd5 a'))?.find(e => /torrent.*\d+/i.test(e.innerText))
-  const hasTorrent = torrentLink?.innerText.match(/\d+/)[0] | 0
+        popup.appendContent(TEXT.downloadingFile.replace('${fileName}', fileName));
 
-  if (hasTorrent > 0) {
-    const imgBtn = document.createElement('div')
-    imgBtn.innerText = '继续下载图片'
-    imgBtn.setAttribute('class', 'tha nosel custom-btn')
-    imgBtn.addEventListener('click', downloadFullImage, false)
-
-    const torrentBtn = document.createElement('div')
-    torrentBtn.innerText = '下载种子文档'
-    torrentBtn.setAttribute('class', 'ths nosel custom-btn')
-    torrentBtn.addEventListener(
-      'click',
-      function (link, dom) {
-        link.click()
-        closeModal()
-      }.bind(null, torrentLink),
-      false
-    )
-
-    openModal({
-      maskClose: true,
-      title: '提示',
-      content: `当前文档有 ${hasTorrent} 个种子文件，推荐下载种子文件。`,
-      footer: [imgBtn, torrentBtn]
-    })
-  } else {
-    downloadFullImage()
-  }
-}
-
-function createP(html, tag = 'p') {
-  const p = document.createElement(tag)
-  p.innerHTML = html
-  return p
-}
-
-// 下载图片逻辑
-async function downloadFullImage() {
-  openModal({ title: `下载图片：${document.querySelector('#gn')?.innerText}`, content: true })
-
-  const errList = []
-  // 2. 获取分页内容和分页连接
-  const links = await fetchImageLinks()
-  console.log(links)
-
-  _popup.appendContent(`获取完成，共获取到${links.size}条数据`, `<b>【准备开始下载】</b>`)
-  // 3. 开始下载
-  for (let item of links) {
-    const ctx = await fetchContent(item)
-    const title = Array.from(ctx.querySelectorAll('#i2 > div'))?.pop()?.innerText
-    const name = location.pathname.match(/g\/(\d+)/)?.[1] + ' - ' + title?.split('::')[0].replace(' ', '', 'g')
-    const link = ctx.querySelector('#i6 > div:last-child a')?.href
-
-    _popup.appendContent(`下载 ${name}...`)
-
-    // 如果没有大图就下载在页面上的图片
-    if (!link) {
-      errList.push(item)
-      _popup.appendContent(`下载失败 ${name}... <a target='_blank' href='${item}'>${item}</a>`)
-      continue
-    }
-
-    // chrome.runtime.sendMessage({
-    //   type: 'NEWTAB',
-    //   payload: { url: link }
-    // })
-    const payload = { url: link, name: name }
-
-    console.log(payload)
-    chrome.runtime.sendMessage({
-      type: 'DOWNLOAD',
-      payload
-    })
-
-    await asyncTimeout(1000)
-  }
-}
-
-// 获取所有图片链接
-async function fetchImageLinks() {
-  const links = new Set()
-
-  // 1. 先获取本页所有连接
-  selectorAllLinks(document, links)
-
-  // 2. 获取分页内容和分页连接
-  const uri = location.origin + location.pathname
-  const pageBox = document.querySelector('.ptt')
-
-  let total = Array.from(pageBox?.querySelectorAll('td')).slice(-2)[0]?.innerText | 0
-  // 选中的页码
-  let page = pageBox?.querySelector('.ptds')?.querySelector('a')?.innerText | 0
-
-  _popup.appendContent(`<b>【开始获取数据】</b>`, `从第 ${page} 页开始，共有 ${total} 页数据...`)
-
-  for (; page < total; page++) {
-    const url = `${uri}?p=${page}`
-    _popup.appendContent(`获取第 ${page} 页数据... <a target='_blank' href='${url}'>${url}</a>`)
-
-    const ctx = await fetchContent(url)
-    await asyncTimeout()
-    selectorAllLinks(ctx, links)
-  }
-
-  return links
-}
-
-// 获取列表页所有图片的链接, 每张图片的大图内容页链接
-function selectorAllLinks(dom, links) {
-  dom
-    ?.querySelector('#gdt')
-    ?.querySelectorAll('a')
-    ?.forEach(e => e.href && links.add(e.href))
-}
-// ========== 批量下载原图 end ========================================
-
-// ========== 自动 start ========================================
-// non, pending, loading, error
-let autoLoadPageStatus = 'pending'
-let previewCssInserted = false
-
-if (autoLoadPath.some(e => new RegExp(e).test(location.pathname))) {
-  initAutoLoadPage()
-}
-
-function initAutoLoadPage(height = 1000) {
-  let ticking = false
-
-  const path = location.pathname
-  window.addEventListener('scroll', function () {
-    // console.log(!ticking && autoLoadPageStatus === 'pending')
-    if (!ticking && autoLoadPageStatus === 'pending') {
-      window.requestAnimationFrame(function () {
-        // autoLoadList()
-
-        if (new RegExp('^/g/').test(path)) {
-          // 图片详情列表
-          autoLoadList()
-        } else if (new RegExp('^/s/').test(path)) {
-          // 图片大图预览
-          autoLoadShow()
-        } else {
-          // 图片首页等列表
-          autoLoadHome()
+        if (!imageUrl) {
+          throw new Error(CURRENT_LANG === 'zh' ? '未找到原图链接' : 'Original image link not found');
         }
 
-        setTimeout(() => {
-          ticking = false
-        }, 300)
-      })
-
-      ticking = true
-    }
-  })
-}
-
-// 暂时注释了，分页太多影响返回。
-function setHistory(url) {
-  // history.pushState({}, '', new URL(url))
-}
-/**
- * 判断是否达成滚动条件
- * @param {*} pageBox 页码dom
- * @returns 返回 msgBox dom
- */
-function checkScroll(pageBox) {
-  if (!pageBox) {
-    return false
-  }
-
-  // 距离底部小于1000像素, 执行加载下一页
-  if (pageBox.getBoundingClientRect().y - document.documentElement.clientHeight > 1000) {
-    return false
-  }
-
-  let pageMsg = document.querySelector('#page-message')
-  if (!pageMsg) {
-    pageMsg = document.createElement('p')
-    // pageMsg.style = 'color: #000;'
-    pageMsg.id = 'page-message'
-    pageMsg.style.textAlign = 'center'
-    pageBox?.parentNode?.insertBefore(pageMsg, pageBox)
-  }
-
-  return pageMsg
-}
-
-/**
- * 自动加载首页
- * @param {*} params
- */
-async function autoLoadHome() {
-  const pageBox = document.querySelectorAll('.searchnav')?.[1]
-  const pageMsg = checkScroll(pageBox)
-
-  if (!pageMsg) {
-    return
-  }
-
-  const link = document.querySelector('#dnext')?.href
-
-  if (link) {
-    try {
-      autoLoadPageStatus = 'loading'
-      pageMsg.innerText = '加载中'
-
-      // 获取下一页内容
-      const ctx = await fetchContent(link)
-
-      // 设置历史记录
-      setHistory(link)
-
-      // 设置页码
-      // 要先设置页码, 再添加内容, 因为preview页面的标题在页码里面。
-      const pageNode = ctx.querySelectorAll('.searchnav')?.[1]
-      if (pageNode) {
-        pageBox.innerHTML = pageNode.innerHTML
-      }
-
-      // 设置内容
-      const content = ctx.querySelector('.itg')?.children
-
-      if (content) {
-        document.querySelector('.itg')?.append(...content)
-      }
-
-      // 中途没有改变状态，那么恢复默认状态
-      if (autoLoadPageStatus == 'loading') {
-        autoLoadPageStatus = 'pending'
-        pageMsg.innerText = '加载失败，请尝试滚动页面'
-      }
-    } catch (error) {
-      console.log(error)
-      autoLoadPageStatus = 'error'
-      pageMsg.innerText = '出现错误啦 '
-    }
-  } else {
-    // 没有下一页了，或者下一页获取失败
-    autoLoadPageStatus = 'non'
-    pageMsg.innerText = '大概没有下一页了'
-  }
-}
-
-async function autoLoadList() {
-  const pageBox = document.querySelector('.ptb')
-  const pageMsg = checkScroll(pageBox)
-  if (!pageMsg) {
-    return
-  }
-
-  const link = pageBox.querySelectorAll('td:last-child')?.[0]?.querySelector('a')?.href
-  if (link) {
-    try {
-      autoLoadPageStatus = 'loading'
-      pageMsg.innerText = '加载中'
-
-      // 获取下一页内容
-      const ctx = await fetchContent(link)
-
-      // 设置历史记录
-      setHistory(link)
-      // 设置页码
-      // 要先设置页码, 再添加内容, 因为preview页面的标题在页码里面。
-      pageBox.innerHTML = ctx.querySelector('.ptb').innerHTML
-
-      // 设置内容
-      const list = ctx.querySelector('#gdt')?.children
-
-      if (list) {
-        const content = document.querySelector('#gdt')
-        Array.from(list).forEach(child => {
-            content.appendChild(child); 
+        // 发送下载请求
+        chrome.runtime.sendMessage({
+          type: 'DOWNLOAD',
+          payload: { url: imageUrl, filename: fileName }
         });
-      }
 
-      // 中途没有改变状态，那么恢复默认状态
-      if (autoLoadPageStatus == 'loading') {
-        autoLoadPageStatus = 'pending'
-        pageMsg.innerText = '加载失败，请尝试滚动页面'
+        // 控制下载速度，避免请求过于频繁
+        await Utils.asyncTimeout(1000);
+      } catch (error) {
+        errorLinks.push(link);
+        popup.appendContent(
+          TEXT.downloadFailed
+            .replace('${link}', link)
+            .replace('${error.message}', error.message)
+        );
       }
-    } catch (error) {
-      console.log(error)
-      autoLoadPageStatus = 'error'
-      pageMsg.innerText = '出现错误啦 '
     }
-  } else {
-    // 没有下一页了，或者下一页获取失败
-    autoLoadPageStatus = 'non'
-    pageMsg.innerText = '大概没有下一页了'
-  }
-}
 
-async function autoLoadShow() {
-  const pageBox = document.querySelectorAll('.sn')
-  const pageMsg = checkScroll(pageBox[1])
-  if (!pageMsg) {
-    return
-  }
-
-  const link = pageBox[1].querySelector('#next')?.href
- const [a, b] =  Array.from(document.querySelector('.sn > div').querySelectorAll('span')).map(e => e.innerText)
-
-  if (a !== b) {
-    try {
-      autoLoadPageStatus = 'loading'
-      pageMsg.innerText = '加载中'
-
-      // 获取下一页内容
-      const ctx = await fetchContent(link)
-
-      // 设置历史记录
-      // setHistory(link)
-      // 设置页码
-      // 要先设置页码, 再添加内容, 因为preview页面的标题在页码里面。
-
-      const page = ctx.querySelector('.sn')
-      const info = page.nextElementSibling
-      pageBox.forEach(e => (e.innerHTML = page.innerHTML))
-
-      // 设置内容
-      const doc = document.querySelector('#i3')
-      doc.appendChild(page.nextElementSibling)
-      doc.appendChild(ctx.querySelector('#i3').firstChild)
-
-      if (!previewCssInserted) {
-        const style = document.createElement('style')
-        style.textContent = `#i3 > div {color: #222;}`
-        document.head.appendChild(style)
-        previewCssInserted = true
-      }
-
-      // 中途没有改变状态，那么恢复默认状态
-      if (autoLoadPageStatus == 'loading') {
-        autoLoadPageStatus = 'pending'
-        pageMsg.innerText = '加载失败，请尝试滚动页面'
-      }
-    } catch (error) {
-      console.log(error)
-      autoLoadPageStatus = 'error'
-      pageMsg.innerText = '出现错误啦 '
+    if (errorLinks.length > 0) {
+      popup.appendContent(`<b>${TEXT.partialDownloadComplete.replace('${errorLinks.length}', errorLinks.length)}</b>`);
+    } else {
+      popup.appendContent(`<b>${TEXT.allDownloadComplete}</b>`);
     }
-  } else {
-    // 没有下一页了，或者下一页获取失败
-    autoLoadPageStatus = 'non'
-    pageMsg.innerText = '大概没有下一页了'
+  }
+
+  /**
+   * 收集所有图片详情页链接（包括分页）
+   * @param {Object} popup - 模态框对象
+   * @returns {Promise<Set>} 图片链接集合
+   */
+  async collectImageLinks(popup) {
+    const imageLinks = new Set();
+
+    // 1. 收集当前页链接
+    this.collectPageImageLinks(document, imageLinks);
+
+    // 2. 获取分页信息
+    const baseUri = `${location.origin}${location.pathname}`;
+    const paginationBox = document.querySelector(PAGE_DOM_SELECTORS.gallery.topNav);
+
+    if (!paginationBox) {
+      return imageLinks;
+    }
+
+    // 解析总页数和当前页
+    const totalPages = parseInt(Array.from(paginationBox.querySelectorAll('td')).slice(-2)[0]?.innerText || '1', 10);
+    let currentPage = parseInt(paginationBox.querySelector(PAGE_DOM_SELECTORS.gallery.currentPage)?.querySelector('a')?.innerText || '0', 10);
+
+    popup.appendContent(
+      `<b>${TEXT.collectingLinks}</b>`, 
+      TEXT.startFromPage
+        .replace('${currentPage}', currentPage)
+        .replace('${totalPages}', totalPages)
+    );
+
+    // 3. 遍历所有分页收集链接
+    for (; currentPage < totalPages; currentPage++) {
+      const pageUrl = `${baseUri}?p=${currentPage}`;
+      popup.appendContent(
+        `${TEXT.collectingPage.replace('${currentPage}', currentPage)} <a target='_blank' href='${pageUrl}'>${TEXT.viewPage}</a>`
+      );
+
+      const pageDom = await Utils.fetchPageContent(pageUrl);
+      await Utils.asyncTimeout(500);  // 短暂延迟，避免请求过快
+      this.collectPageImageLinks(pageDom, imageLinks);
+    }
+
+    return imageLinks;
+  }
+
+  /**
+   * 从单页中收集图片详情页链接
+   * @param {Document} dom - 页面DOM
+   * @param {Set} linksSet - 存储链接的集合
+   */
+  collectPageImageLinks(dom, linksSet) {
+    dom
+      ?.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)  // 图片列表容器
+      ?.querySelectorAll('a')  // 所有图片链接
+      ?.forEach(link => link.href && linksSet.add(link.href));
   }
 }
 
-// 获取并返回指定页面的dom数据
-function fetchContent(url) {
-  return new Promise((resolve, reject) => {
-    fetch(url)
-      .then(res => res.text())
-      .then(res => {
-        const content = document.createElement('html')
-        content.innerHTML = res
-        // console.log(content.querySelector('div.itg'))
-        resolve(content)
-      })
-      .catch(err => reject(err))
-  })
+
+/**
+ * 自动加载管理器 - 处理页面滚动自动加载下一页功能
+ */
+class AutoLoader {
+  constructor() {
+    this.status = 'pending';  // 状态: non, pending, loading, error
+    this.previewStyleInserted = false;
+    this.init();
+  }
+
+  /**
+   * 初始化自动加载功能
+   */
+  init() {
+    // 在匹配的页面初始化自动加载功能
+    if (AUTO_LOAD_PATHS.some(pattern => new RegExp(pattern).test(location.pathname))) {
+      this.initAutoLoad();
+    }
+  }
+
+  /**
+   * 初始化自动加载功能
+   * 监听滚动事件，当接近页面底部时加载下一页
+   * @param {number} threshold - 触发加载的滚动阈值（像素）
+   */
+  initAutoLoad(threshold = 1000) {
+    let isProcessing = false;  // 防止重复触发
+
+    const currentPath = location.pathname;
+
+    // 监听滚动事件
+    window.addEventListener('scroll', () => {
+      // 仅在等待状态且未在处理中时触发
+      if (!isProcessing && this.status === 'pending') {
+        window.requestAnimationFrame(() => {
+          // 根据页面类型执行不同的加载逻辑
+          if (new RegExp('^/g/').test(currentPath)) {
+            // 画廊列表页
+            this.autoLoadGalleryList();
+          } else if (new RegExp('^/s/').test(currentPath)) {
+            // 图片详情页
+            this.autoLoadImagePage();
+          } else {
+            // 首页等其他列表页
+            this.autoLoadHomePage();
+          }
+
+          // 短暂延迟后允许再次触发
+          setTimeout(() => {
+            isProcessing = false;
+          }, 300);
+        });
+
+        isProcessing = true;
+      }
+    });
+  }
+
+  /**
+   * 检查是否满足滚动加载条件
+   * @param {HTMLElement} paginationBox - 分页容器元素
+   * @returns {HTMLElement|null} 状态消息元素，不满足条件时返回null
+   */
+  checkScrollCondition(paginationBox) {
+    if (!paginationBox) {
+      return null;
+    }
+
+    // 计算分页容器距离底部的距离
+    const distanceToBottom = paginationBox.getBoundingClientRect().y - document.documentElement.clientHeight;
+    // 距离底部超过阈值则不加载
+    if (distanceToBottom > 1000) {
+      return null;
+    }
+
+    // 创建或获取状态消息元素
+    let statusMessage = document.querySelector('#page-message');
+    if (!statusMessage) {
+      statusMessage = document.createElement('p');
+      statusMessage.id = 'page-message';
+      statusMessage.style.textAlign = 'center';
+      paginationBox?.parentNode?.insertBefore(statusMessage, paginationBox);
+    }
+
+    return statusMessage;
+  }
+
+  /**
+   * 自动加载首页内容
+   */
+  async autoLoadHomePage() {
+    const paginationBox = document.querySelectorAll(PAGE_DOM_SELECTORS.home.searchNav)?.[1];
+    const statusMessage = this.checkScrollCondition(paginationBox);
+
+    if (!statusMessage) {
+      return;
+    }
+
+    // 获取下一页链接
+    const nextPageLink = document.querySelector(PAGE_DOM_SELECTORS.home.bottomNext)?.href;
+    if (nextPageLink) {
+      try {
+        this.status = 'loading';
+        statusMessage.innerText = TEXT.loadingNextPage;
+
+        // 获取下一页内容
+        const nextPageDom = await Utils.fetchPageContent(nextPageLink);
+
+        // 更新分页导航
+        const newPagination = nextPageDom.querySelectorAll(PAGE_DOM_SELECTORS.home.searchNav)?.[1];
+        if (newPagination) {
+          paginationBox.innerHTML = newPagination.innerHTML;
+        }
+
+        // 添加新内容到当前页
+        const newContent = nextPageDom.querySelector(PAGE_DOM_SELECTORS.home.contentBody)?.children;
+        if (newContent) {
+          document.querySelector(PAGE_DOM_SELECTORS.home.contentBody)?.append(...newContent);
+        }
+
+        // 恢复等待状态（如果未被其他操作改变）
+        if (this.status === 'loading') {
+          this.status = 'pending';
+          statusMessage.innerText = TEXT.scrollToLoadMore;
+        }
+      } catch (error) {
+        console.error('Auto load failed:', error);
+        this.status = 'error';
+        statusMessage.innerText = TEXT.loadFailedRetry;
+      }
+    } else {
+      // 没有下一页
+      this.status = 'non';
+      statusMessage.innerText = TEXT.allContentLoaded;
+    }
+  }
+
+  /**
+   * 自动加载画廊列表页内容
+   */
+  async autoLoadGalleryList() {
+    const paginationBox = document.querySelector(PAGE_DOM_SELECTORS.gallery.bottomNav);
+    const statusMessage = this.checkScrollCondition(paginationBox);
+
+    if (!statusMessage) {
+      return;
+    }
+
+    // 获取下一页链接
+    const nextPageLink = paginationBox.querySelectorAll('td:last-child')?.[0]?.querySelector('a')?.href;
+    if (nextPageLink) {
+      try {
+        this.status = 'loading';
+        statusMessage.innerText = TEXT.loadingNextPage;
+
+        // 获取下一页内容
+        const nextPageDom = await Utils.fetchPageContent(nextPageLink);
+
+        // 更新分页导航
+        paginationBox.innerHTML = nextPageDom.querySelector(PAGE_DOM_SELECTORS.gallery.bottomNav).innerHTML;
+
+        // 添加新图片到列表
+        const newImages = nextPageDom.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)?.children;
+        if (newImages) {
+          const contentContainer = document.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer);
+          Array.from(newImages).forEach(child => {
+            contentContainer.appendChild(child);
+          });
+        }
+
+        // 恢复等待状态
+        if (this.status === 'loading') {
+          this.status = 'pending';
+          statusMessage.innerText = TEXT.scrollToLoadMore;
+        }
+      } catch (error) {
+        console.error('Auto load failed:', error);
+        this.status = 'error';
+        statusMessage.innerText = TEXT.loadFailedRetry;
+      }
+    } else {
+      // 没有下一页
+      this.status = 'non';
+      statusMessage.innerText = TEXT.allContentLoaded;
+    }
+  }
+
+  /**
+   * 自动加载图片查看页（下一张图片）
+   */
+  async autoLoadImagePage() {
+    const paginationBoxes = document.querySelectorAll(PAGE_DOM_SELECTORS.imageView.navBar);
+    if (paginationBoxes.length < 2) return;
+
+    const statusMessage = this.checkScrollCondition(paginationBoxes[1]);
+    if (!statusMessage) {
+      return;
+    }
+
+    // 检查是否有下一页
+    const [currentPage, totalPages] = Array.from(document.querySelector(PAGE_DOM_SELECTORS.imageView.pageNumber).querySelectorAll('span'))
+      .map(span => span.innerText);
+
+    if (currentPage !== totalPages) {
+      try {
+        this.status = 'loading';
+        statusMessage.innerText = TEXT.loadingNextImage;
+
+        // 获取下一页链接并加载内容
+        const nextPageLink = paginationBoxes[1].querySelector(PAGE_DOM_SELECTORS.imageView.nextButton)?.href;
+        if (!nextPageLink) throw new Error(CURRENT_LANG === 'zh' ? '未找到下一页链接' : 'Next page link not found');
+
+        const nextPageDom = await Utils.fetchPageContent(nextPageLink);
+
+        // 更新分页信息
+        const newPagination = nextPageDom.querySelector(PAGE_DOM_SELECTORS.imageView.navBar);
+        paginationBoxes.forEach(box => {
+          box.innerHTML = newPagination.innerHTML;
+        });
+
+        // 添加新图片内容
+        const contentContainer = document.querySelector(PAGE_DOM_SELECTORS.imageView.contentContainer);
+        const newContent = nextPageDom.querySelector(PAGE_DOM_SELECTORS.imageView.contentContainer).firstChild;
+        contentContainer.appendChild(newPagination.nextElementSibling);
+        contentContainer.appendChild(newContent);
+
+        // 添加预览样式（仅一次）
+        if (!this.previewStyleInserted) {
+          const style = document.createElement('style');
+          style.textContent = `#i3 > div {color: #222;}`;
+          document.head.appendChild(style);
+          this.previewStyleInserted = true;
+        }
+
+        // 恢复等待状态
+        if (this.status === 'loading') {
+          this.status = 'pending';
+          statusMessage.innerText = TEXT.scrollToLoadMore;
+        }
+      } catch (error) {
+        console.error('Auto load failed:', error);
+        this.status = 'error';
+        statusMessage.innerText = TEXT.loadFailedRetry;
+      }
+    } else {
+      // 没有下一页
+      this.status = 'non';
+      statusMessage.innerText = TEXT.allImagesLoaded;
+    }
+  }
 }
+
+
+// 创建模态框管理器实例（作为公共依赖）
+const modalManager = new ModalManager();
+
+// 初始化各个功能模块
+new TorrentDownloader(modalManager);
+new ImageDownloader(modalManager);
+new AutoLoader();
