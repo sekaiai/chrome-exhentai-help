@@ -1,5 +1,4 @@
 'use strict'
-
 /**
  * 文字常量定义 - 包含中英文版本
  */
@@ -31,7 +30,8 @@ const TEXT_CONSTANTS = {
     loadFailedRetry: '加载失败，尝试滚动重试',
     allContentLoaded: '已加载全部内容',
     loadingNextImage: '正在加载下一张图片...',
-    allImagesLoaded: '已加载全部图片'
+    allImagesLoaded: '已加载全部图片',
+    torrentExist: '已存在'
   },
   en: {
     downloadAllTorrentBtn: 'Download All Torrents',
@@ -61,7 +61,8 @@ const TEXT_CONSTANTS = {
     loadFailedRetry: 'Load failed, try scrolling to retry',
     allContentLoaded: 'All content loaded',
     loadingNextImage: 'Loading next image...',
-    allImagesLoaded: 'All images loaded'
+    allImagesLoaded: 'All images loaded',
+    torrentExist: 'exists'
   }
 }
 
@@ -77,25 +78,27 @@ const TEXT_DOWNLOAD_OPTIONS = {
     pages: '页',
 
     stopAtTorrentTitle:
-      '下载完该画廊结束所有下载\n例: https://exhentai.org/g/2426870/5c9b316fef/\nid是2426870\n即下载完2426870的种子就停止所有下载',
+      '下载到该画廊结结束任务\n不包括该画廊\n该画廊必须包含种子且必须在搜索列表中\n直接填写画廊链接\n例: https://exhentai.org/g/2426870/5c9b316fef/',
     stopAtTorrentLabel: '下载到',
     stopAtTorrentEnd: '结束',
 
     skipDownloaded: '跳过下载过的种子',
+    stopDownloaded: '遇到下载过的种子结束下载',
     clearDownloaded: '清除已下载记录',
     clearDownloadedConfirm: '【跳过下载过的种子】依赖该数据，\n确定清除已下载记录吗？',
 
     downloadedCount: '已下载',
     torrentsCount: '个种子',
 
-    downloadPathInfo: '下载种子文件保存到',
+    downloadPathInfo: '保存到新文件夹（修改保存位置：设置→下载内容→位置）',
     defaultPathTip: '这是浏览器默认下载路径，若要更改请在浏览器设置中修改',
     folderPlaceholder: '文件夹，没有则新建。不填则默认',
 
     // 通用文本
     download: '下载',
     gallery: '画廊',
-    stopAllDownloads: '停止所有下载'
+    stopAllDownloads: '停止所有下载',
+    showDefaultFolder: '打开'
   },
   en: {
     downloadConfig: 'Download Configuration',
@@ -108,11 +111,12 @@ const TEXT_DOWNLOAD_OPTIONS = {
     pages: 'pages',
 
     stopAtTorrentTitle:
-      'Stop all downloads after finishing this gallery\nExample: https://exhentai.org/g/2426870/5c9b316fef/\nThe ID is 2426870\nStop all downloads after downloading torrent 2426870',
+      'Stop all downloads after finishing this gallery\nExample: https://exhentai.org/g/2426870/5c9b316fef/',
     stopAtTorrentLabel: 'Stop at',
     stopAtTorrentEnd: 'end',
 
     skipDownloaded: 'Skip downloaded torrents',
+    stopDownloaded: 'Stop downloads when encountering downloaded torrents',
     clearDownloaded: 'Clear download records',
     clearDownloadedConfirm:
       '【Skip downloaded torrents】 depends on this data,\nare you sure you want to clear the download records?',
@@ -120,14 +124,15 @@ const TEXT_DOWNLOAD_OPTIONS = {
     downloadedCount: 'Downloaded',
     torrentsCount: 'torrents',
 
-    downloadPathInfo: 'Download torrent files to',
+    downloadPathInfo: 'Save to new folder (save location: Settings → Downloads → Location)',
     defaultPathTip: 'This is the browser default download path. To change it, please modify in browser settings',
     folderPlaceholder: 'Folder, create if not exists. Leave empty for default',
 
     // 通用文本
     download: 'Download',
     gallery: 'Gallery',
-    stopAllDownloads: 'Stop all downloads'
+    stopAllDownloads: 'Stop all downloads',
+    showDefaultFolder: 'Open Folder'
   }
 }
 
@@ -152,59 +157,59 @@ const TEXT = TEXT_CONSTANTS[CURRENT_LANG]
 const PAGE_DOM_SELECTORS = {
   // 首页相关选择器 (https://exhentai.org/)
   home: {
-    contentTable: '.gltm',       // 首页内容表格
-    contentBody: '.itg',         // 首页内容主体
-    bottomNext: '#dnext',        // 底部下一页按钮
-    topNext: '#unext',           // 顶部下一页按钮
-    topPane: '#toppane',         // 顶部搜索块
-    searchNav: '.searchnav',     // 分页导航栏
-    torrentIcon: '.gldown > a',  // 下载种子icon
+    contentTable: '.gltm', // 首页内容表格
+    contentBody: '.itg', // 首页内容主体
+    bottomNext: '#dnext', // 底部下一页按钮
+    topNext: '#unext', // 顶部下一页按钮
+    topPane: '#toppane', // 顶部搜索块
+    searchNav: '.searchnav', // 分页导航栏
+    torrentIcon: '.gldown > a' // 下载种子icon
   },
   // 图片详情列表页选择器 (https://exhentai.org/g/2374482/33d2ec5afc/)
   gallery: {
-    topNav: '.ptt',              // 顶部分页导航
-    bottomNav: '.ptb',           // 底部分页导航
-    currentPage: '.ptds',        // 当前选中页码
-    contentContainer: '#gdt',    // 列表内容容器
-    asidePane: '#gd5 a',         // 画廊详情页侧边栏
-    title: '#gn',                //画廊标题
+    topNav: '.ptt', // 顶部分页导航
+    bottomNav: '.ptb', // 底部分页导航
+    currentPage: '.ptds', // 当前选中页码
+    contentContainer: '#gdt', // 列表内容容器
+    asidePane: '#gd5 a', // 画廊详情页侧边栏
+    title: '#gn' //画廊标题
   },
   // 图片查看页选择器 (https://exhentai.org/s/d1c20fcadc/2374482-1)
   imageView: {
-    pt: '#i2',                          // 顶部信息区
-    pb: '#i4',                          // 底部信息区
-    nextButton: '#next',                // 下一页按钮
-    contentContainer: '#i3',            // 图片容器
-    title: '#i2 > div',                 // 图片标题
+    pt: '#i2', // 顶部信息区
+    pb: '#i4', // 底部信息区
+    nextButton: '#next', // 下一页按钮
+    contentContainer: '#i3', // 图片容器
+    title: '#i2 > div', // 图片标题
     imageUrl: '#i6 > div:last-child a', // 图片地址
-    navBar: '.sn',                      // 翻页工具栏
-    pageNumber: '.sn > div'             // 翻页工具栏中的页码
+    imageThumb: '#img',
+    navBar: '.sn', // 翻页工具栏
+    pageNumber: '.sn > div' // 翻页工具栏中的页码
   }
 }
-
 
 /**
  * 需要加载下载按钮的页面路径正则常量
  */
 const INCLUDE_DOWNLOAD_BUTTON_PATHS = [
-  '^/$',                // 首页
-  '^/watched',          // 已观看页面
-  '^/favorites',        // 收藏页面
-  '^/torrents',         // 种子页面
-  '^/uploader',         // 上传者页面
-  '^/popular'           // 热门页面
+  '^/$', // 首页
+  '^/watched', // 已观看页面
+  '^/favorites', // 收藏页面
+  '^/torrents', // 种子页面
+  '^/uploader', // 上传者页面
+  '^/popular' // 热门页面
 ]
 
 /**
  * 需要自动加载下一页的页面路径正则常量
  */
 const AUTO_LOAD_PATHS = [
-  '^/$',                // 首页
-  '^/watched',          // 已观看页面
-  '^/favorites',        // 收藏页面
-  '^/g/',               // 画廊详情页
-  '^/s/',               // 图片详情页
-  '^/tag/'              // 标签页面
+  '^/$', // 首页
+  '^/watched', // 已观看页面
+  '^/favorites', // 收藏页面
+  '^/g/', // 画廊详情页
+  '^/s/', // 图片详情页
+  '^/tag/' // 标签页面
 ]
 
 /**
@@ -310,6 +315,30 @@ class Utils {
     link.click()
     URL.revokeObjectURL(link.href) // 释放资源
   }
+
+    /**
+   * 操作用户数据数据库
+   * @param {*} payload {table: 'torrent', action: 'add', params: {torrentID}}
+   */
+  static useDatabase(payload) {
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage(
+        {
+          type: 'DB',
+          payload
+        },
+        res => {
+          console.log('DB请求响应233:', res)
+
+          if (res.success) {
+            resolve(res.data)
+          } else {
+            resolve(false)
+          }
+        }
+      )
+    })
+  }
 }
 
 /**
@@ -317,6 +346,7 @@ class Utils {
  */
 class ModalManager {
   constructor() {
+    this.maskClose = false
     this.popup = {} // 存储模态框相关DOM元素
   }
 
@@ -376,8 +406,10 @@ class ModalManager {
 
     // 配置遮罩点击关闭功能
     if (options.maskClose) {
+      this.maskClose = true
       this.popup.overlay.addEventListener('click', () => this.closeModal(), false)
     } else {
+      this.maskClose = false
       this.popup.overlay.removeEventListener('click', () => this.closeModal(), false)
     }
 
@@ -449,6 +481,10 @@ class ModalManager {
    * 关闭模态框
    */
   closeModal() {
+    if (!this.maskClose) {
+      return
+    }
+
     if (this.popup.overlay && document.body.contains(this.popup.overlay)) {
       document.body.removeChild(this.popup.overlay)
     }
@@ -468,6 +504,9 @@ class ModalManager {
  */
 class TorrentDownloader {
   constructor(modalManager) {
+    this.taskID = ''
+    this.maxDownloads = 0
+    this.downloadParams = {}
     this.status = 'pending' // 状态: pending, downloading, pause
     this.modalManager = modalManager
     this.init()
@@ -515,29 +554,47 @@ class TorrentDownloader {
     }
   }
 
-  openDownloadModal() {
+  /**
+   * 打开批量下载模态框
+   */
+  async openDownloadModal() {
     const TEXT = TEXT_DOWNLOAD_OPTIONS[CURRENT_LANG]
-    const DOWNLOADED_COUNT = 3000
-    const DEFAULT_PATH = 'E:/Code/tampermonkey/chrome-exhentai-help/build/'
+    let DOWNLOADED_COUNT = 0
+
+    await new Promise(resolve => {
+      chrome.runtime.sendMessage({ type: 'DB', payload: { module: 'torrent', action: 'getTotalCount' } }, res => {
+        if (res.success) {
+          DOWNLOADED_COUNT = res.data
+          resolve()
+        }
+      })
+    })
 
     // 创建按钮
     const startBtn = Utils.createButton(TEXT.startDownload, () => {
       const params = {
-        maxDownloads: Utils.getInputValue('max-downloads'),
-        maxPages: Utils.getInputValue('max-pages'),
+        maxDownloads: ~~Utils.getInputValue('max-downloads'),
+        maxPages: ~~Utils.getInputValue('max-pages'),
         stopAtTorrent: Utils.getInputValue('stop-at-torrent'),
         skipDownloaded: Utils.getCheckboxState('skip-downloaded'),
+        stopDownloaded: Utils.getCheckboxState('stop-downloaded'),
         downloadPath: Utils.getInputValue('download-path')
       }
       console.log(params)
-      // this.downloadAllTorrents(params)
+
+      // 创建任务
+      // 开始下载
+      // 下载过程写入数据库
+      // taskDB.addPlan({type: 'torrent', params})
+
+      this.downloadAllTorrents(params)
     })
     const cancelBtn = Utils.createButton(TEXT.cancel, () => this.modalManager.closeModal())
 
     this.modalManager.openModal({
       maskClose: true,
       title: TEXT.downloadConfig,
-      content: this.createModalContent(TEXT, DOWNLOADED_COUNT, DEFAULT_PATH),
+      content: this.createModalContent(TEXT, DOWNLOADED_COUNT),
       footer: [startBtn, cancelBtn]
     })
   }
@@ -545,21 +602,21 @@ class TorrentDownloader {
   /**
    * 创建模态框内容
    */
-  createModalContent(text, downloadedCount, defaultPath) {
+  createModalContent(text, downloadedCount) {
     const content = document.createElement('div')
     content.className = 'searchadv'
-
     content.innerHTML = `
     <div>
       <div>${text.maxDownloads} <input type="text" id="max-downloads" size="4" maxlength="4"/> ${text.torrents}</div>
       <div>${text.maxPages} <input type="text" id="max-pages" size="4" maxlength="4" /> ${text.pages}</div>
       <div title="${text.stopAtTorrentTitle}">
-        ${text.stopAtTorrentLabel} <input type="text" id="stop-at-torrent" placeholder="id" style="width:60px" /> ${text.stopAtTorrentEnd}
+        ${text.stopAtTorrentLabel} <input type="text" id="stop-at-torrent" placeholder="url" style="width:60px" /> ${text.stopAtTorrentEnd}
       </div>
     </div>
 
     <div>
       <div><label class="lc"><input checked type="checkbox" id="skip-downloaded"><span></span> ${text.skipDownloaded}</label></div>
+      <div><label class="lc"><input type="checkbox" id="stop-downloaded"><span></span> ${text.stopDownloaded}</label></div>
     </div>
 
     <div>
@@ -569,8 +626,8 @@ class TorrentDownloader {
 
     <div title="${text.defaultPathTip}">
       <div style="user-select: text">
+      [<a href="javascript:void(0);" id="show-default-folder">${text.showDefaultFolder}</a>]
         ${text.downloadPathInfo} 
-        <span style="padding-left: 4px">${defaultPath}</span>
       </div>
     </div>
     
@@ -586,11 +643,29 @@ class TorrentDownloader {
         clearBtn.addEventListener('click', e => {
           e.preventDefault()
           if (confirm(text.clearDownloadedConfirm)) {
-            this.clearDownloadedRecords()
+            chrome.runtime.sendMessage({
+              type: 'DB',
+              payload: {
+                module: 'torrent',
+                action: 'clearData'
+              }
+            })
+
             // 更新显示数量
             const countSpan = content.querySelector('#downloaded-count')
             if (countSpan) countSpan.textContent = '0'
           }
+        })
+      }
+
+      const selectPathBtn = content.querySelector('#show-default-folder')
+      console.log('selectPathBtn', selectPathBtn)
+      if (selectPathBtn) {
+        selectPathBtn.addEventListener('click', e => {
+          e.preventDefault()
+          chrome.runtime.sendMessage({
+            type: 'DOWNLOAD_PATH'
+          })
         })
       }
     }, 0)
@@ -604,9 +679,46 @@ class TorrentDownloader {
    */
   async downloadAllTorrents(params) {
     // 打开下载进度模态框
+    const text = TEXT_DOWNLOAD_OPTIONS[CURRENT_LANG]
+
+    let content =
+      '<ul style="font-size: 10pt;    display: flex;    white-space: nowrap;    flex-wrap: wrap;    gap: 0px 30px;    list-style-position: inside;    padding: 0;    margin-top: 0;">'
+    if (params.maxDownloads > 0) {
+      content += `<li>${text.maxDownloads} ${params.maxDownloads} ${text.torrents}</li>`
+    }
+    if (params.maxPages > 0) {
+      content += `<li>${text.maxPages} ${params.maxPages} ${text.pages}</li>`
+    }
+    if (params.stopAtTorrent) {
+      content += `<li>${text.stopAtTorrentLabel} ${params.stopAtTorrent} ${text.stopAtTorrentEnd} </li>`
+      try {
+        const [, a, b] = new URL(params.stopAtTorrent).pathname.match(/([0-9A-Za-z]+)/g)
+        if (a && b) {
+          params.stopAtTorrent = `${a}-${b}`
+        }
+      } catch (error) {
+        console.log('stopAtTorrent格式错误', params.stopAtTorrent)
+      }
+    }
+    if (params.downloadPath) {
+      content += `<li>保存到文件夹 ${params.downloadPath}</li>`
+    }
+    if (params.skipDownloaded) {
+      content += `<li>${text.skipDownloaded}</li>`
+    }
+    content += '</ul>'
+
+    // TODO1: 在这里创建种子任务
+    this.maxDownloads = 0
+    this.downloadParams = params
+
+    const payload = { module: 'torrentTask', action: 'createTask', data: { params: params } }
+    this.taskID = await Utils.useDatabase(payload)
+    console.log('TODO1: 在这里创建种子任务', this.taskID)
+
     const popup = this.modalManager.openModal({
       title: TEXT.downloadModalTitle,
-      content: true
+      content: content
     })
 
     let currentPage = 1
@@ -616,8 +728,14 @@ class TorrentDownloader {
     while (currentDom) {
       popup.appendContent(`<small>${TEXT.pageLabel.replace('${currentPage}', currentPage)}</small>`)
 
-      // 收集当前页的种子链接
-      await this.collectTorrentLinks(currentDom, popup)
+      // 下载当前页的种子链接
+      try {
+        await this.collectTorrentLinks(currentDom, popup)
+      } catch (err) {
+        currentDom = null // 发生错误时终止循环
+        popup.appendContent(`<li>${err.message} - ${text.stopAllDownloads}</li>`)
+        break
+      }
 
       // 获取下一页元素及链接
       const nextPageElement = currentDom.querySelector(PAGE_DOM_SELECTORS.home.topNext)
@@ -625,8 +743,14 @@ class TorrentDownloader {
 
       // 准备处理下一页或结束循环
       if (nextPageUrl) {
-        currentDom = await Utils.fetchPageContent(nextPageUrl)
         currentPage++
+        if (params.maxPages && currentPage > params.maxPages) {
+          currentDom = null // 超过最大页数时终止循环
+          popup.appendContent(`<li>已到指定最大页数 ${params.maxPages} - ${text.stopAllDownloads}</li>`)
+          break
+        }
+
+        currentDom = await Utils.fetchPageContent(nextPageUrl)
       } else {
         currentDom = null // 无下一页时终止循环
       }
@@ -659,6 +783,48 @@ class TorrentDownloader {
     const iframe = this.createIframe('iframe-download-all')
     for (let i = 0; i < urls.length; i++) {
       if (urls[i]) {
+        console.log('this.downloadParams.maxDownload', this.downloadParams.maxDownloads, this.maxDownloads)
+        if (this.downloadParams.maxDownloads && this.maxDownloads >= this.downloadParams.maxDownloads) {
+          throw new Error(`已下载超过指定数量 ${this.downloadParams.maxDownloads}`)
+        }
+
+        // 提取画廊链接信息
+        const [, galleryId, , galleryToken] = new URL(urls[i]).search.match(/([0-9A-Za-z]+)/g) || []
+
+        // TODO: pageTitle,这里需要从列表中获取。
+        // 发送下载请求
+        // TODO2: 检查种子是否已经存在，存在则跳过下载，不存在则添加到任务队列
+        const torrentID = `${galleryId}-${galleryToken}`
+
+        // 判断是否到了指定的种子ID
+        if (this.downloadParams.stopAtTorrent && torrentID === this.downloadParams.stopAtTorrent) {
+          throw new Error(`已到指画廊`)
+        }
+
+        // 判断是否需要跳过，如果不需要跳过就不用判断是否存在。直接开始下载
+        const isExist = await Utils.useDatabase({ module: 'torrent', action: 'isTorrentExist', data: torrentID })
+        if (isExist) {
+          const link = `https://exhentai.org/g/${galleryId}/${galleryToken}`
+
+          // 已存在，停止下载
+          if (this.downloadParams.stopDownloaded) {
+            Utils.useDatabase({
+              module: 'torrentTask',
+              action: 'updateTask',
+              data: [this.taskID, { skipCountAdd: 1, status: 'completed' }]
+            })
+            popup.appendContent(`[${TEXT.torrentExist} 结束] - <a href="${link}" target="_blank">${link}</a>`)
+            throw new Error('已存在触发结束下载')
+          }
+
+          // 已存在，跳过
+          if (this.downloadParams.skipDownloaded) {
+            Utils.useDatabase({ module: 'torrentTask', action: 'updateTask', data: [this.taskID, { skipCountAdd: 1 }] })
+            popup.appendContent(`[${TEXT.torrentExist} 跳过] - <a href="${link}" target="_blank">${link}</a>`)
+            continue
+          }
+        }
+
         // 加载iframe并等待完成
         await this.loadIframeContent(iframe, urls[i])
 
@@ -666,8 +832,7 @@ class TorrentDownloader {
         const torrentForms = iframe.contentDocument.querySelectorAll('form')
 
         // 获取当前种子页面标题
-        const pageTitle = iframe.contentDocument.querySelector('h1').innerText
-        popup.appendContent(`<li>${pageTitle}</li>`)
+        let pageTitle = iframe.contentDocument.querySelector('h1').innerText
 
         // 筛选最新的种子（按时间排序）
         let latestTorrent = { date: 0 }
@@ -689,12 +854,20 @@ class TorrentDownloader {
           }
         })
 
-        // 提取画廊链接信息
-        const [, galleryId, , galleryToken] = iframe.contentDocument.location.search.match(/([0-9A-Za-z]+)/g) || []
-        latestTorrent.galleryLink = `https://exhentai.org/g/${galleryId}/${galleryToken}`
+        // const [, galleryId, , galleryToken] = iframe.contentDocument.location.search.match(/([0-9A-Za-z]+)/g) || []
 
-        // 发送下载请求
+        const tmpTitle = isExist ? `[${TEXT.torrentExist} 下载] ${pageTitle}` : pageTitle
+        popup.appendContent(`<a href="${urls[i]}" target="_blank">${tmpTitle}</a>`)
+        // downloadPath
         this.downloadFile(latestTorrent.torrentUrl, latestTorrent.fileName)
+
+        // this.progress 下载
+        this.maxDownloads++
+
+        // 创建种子，只管创建，其他不用管
+        Utils.useDatabase({ module: 'torrent', action: 'createTorrent', data: { id: torrentID, name: pageTitle } })
+        // 更新种子任务信息
+        Utils.useDatabase({ module: 'torrentTask', action: 'updateTask', data: [this.taskID, { completedCountAdd: 1 }] })
 
         // 避免请求过于频繁
         await Utils.asyncTimeout(1000)
@@ -710,7 +883,31 @@ class TorrentDownloader {
   downloadFile(url, filename = '') {
     chrome.runtime.sendMessage({
       type: 'DOWNLOAD',
-      payload: { url, filename }
+      payload: { url, filename, filepath: this.downloadParams.downloadPath }
+    })
+  }
+
+  /**
+   * 操作用户数据数据库
+   * @param {*} payload {table: 'torrent', action: 'add', params: {torrentID}}
+   */
+  useDatabase(payload) {
+    return new Promise(resolve => {
+      chrome.runtime.sendMessage(
+        {
+          type: 'DB',
+          payload
+        },
+        res => {
+          console.log('DB请求响应233:', res)
+
+          if (res.success) {
+            resolve(res.data)
+          } else {
+            resolve(false)
+          }
+        }
+      )
     })
   }
 
@@ -817,7 +1014,8 @@ class ImageDownloader {
       const imageBtn = document.createElement('div')
       imageBtn.innerText = TEXT.continueDownloadImages
       imageBtn.className = 'tha nosel custom-btn'
-      imageBtn.addEventListener('click', () => this.downloadFullImage(), false)
+      //
+      imageBtn.addEventListener('click', () => this.openDownloadModal(), false)
 
       const torrentBtn = document.createElement('div')
       torrentBtn.innerText = TEXT.downloadTorrentFile
@@ -839,8 +1037,78 @@ class ImageDownloader {
       })
     } else {
       // 没有种子文件，直接下载图片
-      this.downloadFullImage()
+      this.openDownloadModal()
     }
+  }
+
+  openDownloadModal() {
+    const TEXT = TEXT_DOWNLOAD_OPTIONS[CURRENT_LANG]
+
+    // 创建按钮
+    const startBtn = Utils.createButton(TEXT.startDownload, () => {
+      const params = {
+        downloadType: document.querySelector('input[name="download"]:checked').value || 'thumb',
+        skipDownloaded: Utils.getCheckboxState('skip-downloaded'),
+        downloadPath: Utils.getInputValue('download-path')
+      }
+      console.log(params)
+
+      // 创建任务
+      // 开始下载
+      // 下载过程写入数据库
+      // taskDB.addPlan({type: 'torrent', params})
+      this.downloadParams = params
+      this.downloadFullImage()
+    })
+    const cancelBtn = Utils.createButton(TEXT.cancel, () => this.modalManager.closeModal())
+
+    this.modalManager.openModal({
+      maskClose: true,
+      title: TEXT.downloadConfig,
+      content: this.createModalContent(TEXT),
+      footer: [startBtn, cancelBtn]
+    })
+  }
+
+  createModalContent(text) {
+    const content = document.createElement('div')
+    content.className = 'searchadv'
+    content.innerHTML = `
+
+    <div>
+      <div><label class="lc"><input name="download" value="thumb" checked type="radio" ><span></span>下载缩略图</label></div>
+      <div><label class="lc"><input name="download" value="full" type="radio" ><span></span>下载原图</label></div>
+      <div><label class="lc"><input type="checkbox" id="skip-downloaded"><span></span>跳过下载过的图片</label></div>
+    </div>
+
+  
+    <div title="${text.defaultPathTip}">
+      <div style="user-select: text">
+      [<a href="javascript:void(0);" id="show-default-folder">${text.showDefaultFolder}</a>]
+        ${text.downloadPathInfo} 
+      </div>
+    </div>
+    
+    <div>
+      <input type="text" id="download-path" placeholder="${text.folderPlaceholder}" style="width:220px" />
+    </div>
+  `
+
+    // 添加清除记录的事件监听
+    setTimeout(() => {
+      const selectPathBtn = content.querySelector('#show-default-folder')
+      console.log('selectPathBtn', selectPathBtn)
+      if (selectPathBtn) {
+        selectPathBtn.addEventListener('click', e => {
+          e.preventDefault()
+          chrome.runtime.sendMessage({
+            type: 'DOWNLOAD_PATH'
+          })
+        })
+      }
+    }, 0)
+
+    return content
   }
 
   /**
@@ -848,10 +1116,9 @@ class ImageDownloader {
    */
   async downloadFullImage() {
     // 打开下载进度模态框
+    const pateTitle = document.querySelector(PAGE_DOM_SELECTORS.gallery.title)?.innerText || '未知画廊'
     const popup = this.modalManager.openModal({
-      title: `${TEXT.downloadAllImagesBtn}：${
-        document.querySelector(PAGE_DOM_SELECTORS.gallery.title)?.innerText || '未知画廊'
-      }`,
+      title: `${TEXT.downloadAllImagesBtn}：${pateTitle}`,
       content: true
     })
 
@@ -862,21 +1129,50 @@ class ImageDownloader {
       TEXT.linksCollected.replace('${imageLinks.size}', imageLinks.size),
       `<b>${TEXT.startDownloadImages}</b>`
     )
+    const { downloadType, skipDownloaded, downloadPath } = this.downloadParams
 
     // 2. 依次下载每张图片
     for (const link of imageLinks) {
       try {
+        let KEY = new URL(link).pathname.replace('/s/', '').replace('/', '-') + '-' + downloadType
         const pageDom = await Utils.fetchPageContent(link)
         // 获取图片标题和文件名
         const titleElement = Array.from(pageDom.querySelectorAll(PAGE_DOM_SELECTORS.imageView.title)).pop()
         const titleText = titleElement?.innerText || '未知图片'
-        const galleryId = location.pathname.match(/g\/(\d+)/)?.[1] || 'unknown'
-        const fileName = `${galleryId} - ${titleText.split('::')[0].replace(/ /g, '')}.jpg`
+        const fileName = titleText.split('::')[0].replace(/ /g, '') || '未知图片'
+        // const galleryId = location.pathname.match(/g\/(\d+)/)?.[1] || 'unknown'
+        // const fileName = `${galleryId} - ${imgName}`
+console.log('titleText',titleText,fileName)
+        // const exists = await taskDB.exists({ type: 'image', data: `${key}-${downloadType}` })
+        const isExist = await Utils.useDatabase({
+          module: 'image',
+          action: 'isImageExist',
+          data: KEY
+        })
+        // 判断是否跳过已下载图片
+        if (isExist) {
+          // 检查数据库是否已存在记录
+          if (skipDownloaded) {
+            popup.appendContent(TEXT.downloadingFile.replace('${fileName}', `[已存在 - 跳过] ${fileName}`))
+            continue
+          } else {
+            popup.appendContent(TEXT.downloadingFile.replace('${fileName}', `[已存在] ${fileName}`))
+          }
+        } else {
+          popup.appendContent(TEXT.downloadingFile.replace('${fileName}', fileName))
+        }
+
+        let imageUrl
+        // 判断下载图片类型
+        if (downloadType === 'full') {
+          // 原图下载逻辑
+          imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageUrl)?.href
+        } else {
+          // 缩略图下载逻辑
+          imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageThumb)?.src
+        }
 
         // 获取原图链接
-        const imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageUrl)?.href
-
-        popup.appendContent(TEXT.downloadingFile.replace('${fileName}', fileName))
 
         if (!imageUrl) {
           throw new Error(CURRENT_LANG === 'zh' ? '未找到原图链接' : 'Original image link not found')
@@ -885,7 +1181,13 @@ class ImageDownloader {
         // 发送下载请求
         chrome.runtime.sendMessage({
           type: 'DOWNLOAD',
-          payload: { url: imageUrl, filename: fileName }
+          payload: { url: imageUrl, filename: fileName, filepath:downloadPath || pateTitle }
+        })
+
+         Utils.useDatabase({
+          module: 'image',
+          action: 'createImage',
+          data: { id: KEY, name: fileName, link:link,  }
         })
 
         // 控制下载速度，避免请求过于频繁
@@ -909,8 +1211,8 @@ class ImageDownloader {
    * @returns {Promise<Set>} 图片链接集合
    */
   async collectImageLinks(popup) {
+    // TODO: 在这里判断下载条件
     const imageLinks = new Set()
-
     // 1. 收集当前页链接
     this.collectPageImageLinks(document, imageLinks)
 
