@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * 多语言文本常量定义
@@ -35,7 +35,10 @@ const TEXT_CONSTANTS = {
     loadingNextImage: '正在加载下一张图片...',
     allImagesLoaded: '已加载全部图片',
     torrentExist: '已存在',
-    
+    torrentSkip: '跳过',
+    torrentOver: '结束',
+    torrentContinue: '下载',
+
     // 新增的错误和通用文本
     exceedMaxDownloads: '已下载超过指定数量 ${maxDownloads}',
     reachMaxPages: '已到指定最大页数 ${maxPages} - ${stopAllDownloads}',
@@ -70,7 +73,8 @@ const TEXT_CONSTANTS = {
     partialDownloadComplete: 'Download completed, ${errorLinks.length} files failed to download',
     allDownloadComplete: 'All files downloaded successfully!',
     downloadSelectionTitle: 'Download Selection',
-    downloadSelectionContent: 'This gallery has ${torrentCount} torrent files. It is recommended to download the torrent (faster speed).',
+    downloadSelectionContent:
+      'This gallery has ${torrentCount} torrent files. It is recommended to download the torrent (faster speed).',
     continueDownloadImages: 'Continue downloading images',
     downloadTorrentFile: 'Download torrent file',
     loadingNextPage: 'Loading next page...',
@@ -80,7 +84,10 @@ const TEXT_CONSTANTS = {
     loadingNextImage: 'Loading next image...',
     allImagesLoaded: 'All images loaded',
     torrentExist: 'exists',
-    
+    torrentSkip: 'skip',
+    torrentOver: 'over',
+    torrentContinue: 'download',
+
     // New error and general text
     exceedMaxDownloads: 'Exceeded the specified number of downloads ${maxDownloads}',
     reachMaxPages: 'Reached the maximum specified pages ${maxPages} - ${stopAllDownloads}',
@@ -95,7 +102,7 @@ const TEXT_CONSTANTS = {
     imageExist: '[Exists] ${fileName}',
     saveToFolder: 'Save to folder ${downloadPath}'
   }
-};
+}
 
 const TEXT_DOWNLOAD_OPTIONS = {
   zh: {
@@ -103,18 +110,19 @@ const TEXT_DOWNLOAD_OPTIONS = {
     downloadConfig: '下载配置',
     startDownload: '开始下载',
     cancel: '取消',
-    
+
     // 下载限制选项
     maxDownloads: '最多下载',
     torrents: '个种子',
     maxPages: '最多下载',
     pages: '页',
-    
+
     // 停止条件选项
-    stopAtTorrentTitle: '下载到该画廊结束任务\n不包括该画廊\n该画廊必须包含种子且必须在搜索列表中\n直接填写画廊链接\n例: https://exhentai.org/g/2426870/5c9b316fef/',
+    stopAtTorrentTitle:
+      '下载到该画廊结束任务\n不包括该画廊\n直接填写画廊链接\n例: https://exhentai.org/g/2426870/5c9b316fef/',
     stopAtTorrentLabel: '下载到',
     stopAtTorrentEnd: '结束',
-    
+
     // 下载记录管理
     skipDownloaded: '跳过下载过的种子',
     stopDownloaded: '遇到下载过的种子结束下载',
@@ -122,18 +130,18 @@ const TEXT_DOWNLOAD_OPTIONS = {
     clearDownloadedConfirm: '【跳过下载过的种子】依赖该数据，\n确定清除已下载记录吗？',
     downloadedCount: '已下载',
     torrentsCount: '个种子',
-    
+
     // 下载路径选项
     downloadPathInfo: '保存到新文件夹（修改保存位置：设置→下载内容→位置）',
     defaultPathTip: '这是浏览器默认下载路径，若要更改请在浏览器设置中修改',
     folderPlaceholder: '文件夹，没有则新建。不填则默认',
-    
+
     // 通用操作文本
     download: '下载',
     gallery: '画廊',
     stopAllDownloads: '停止所有下载',
     showDefaultFolder: '打开文件夹',
-    
+
     // 图片下载选项
     thumbDownload: '下载缩略图',
     fullDownload: '下载原图',
@@ -142,45 +150,46 @@ const TEXT_DOWNLOAD_OPTIONS = {
   en: {
     // Download configuration text
     downloadConfig: 'Download Configuration',
-    startDownload: 'Start Download',
+    startDownload: 'Download',
     cancel: 'Cancel',
-    
+
     // Download limit options
-    maxDownloads: 'Maximum downloads',
+    maxDownloads: 'Max',
     torrents: 'torrents',
-    maxPages: 'Maximum pages',
+    maxPages: 'Max',
     pages: 'pages',
-    
+
     // Stop condition options
-    stopAtTorrentTitle: 'Stop all downloads after finishing this gallery\nExample: https://exhentai.org/g/2426870/5c9b316fef/',
+    stopAtTorrentTitle: 'Stop all downloads upon this gallery\nExample: https://exhentai.org/g/2426870/5c9b316fef/',
     stopAtTorrentLabel: 'Stop at',
     stopAtTorrentEnd: 'end',
-    
+
     // Download record management
     skipDownloaded: 'Skip downloaded torrents',
     stopDownloaded: 'Stop downloads when encountering downloaded torrents',
     clearDownloaded: 'Clear download records',
-    clearDownloadedConfirm: '【Skip downloaded torrents】 depends on this data,\nare you sure you want to clear the download records?',
+    clearDownloadedConfirm:
+      '【Skip downloaded torrents】 depends on this data,\nare you sure you want to clear the download records?',
     downloadedCount: 'Downloaded',
     torrentsCount: 'torrents',
-    
+
     // Download path options
     downloadPathInfo: 'Save to new folder (save location: Settings → Downloads → Location)',
     defaultPathTip: 'This is the browser default download path. To change it, please modify in browser settings',
     folderPlaceholder: 'Folder, create if not exists. Leave empty for default',
-    
+
     // General operation text
     download: 'Download',
     gallery: 'Gallery',
     stopAllDownloads: 'Stop all downloads',
     showDefaultFolder: 'Open Folder',
-    
+
     // Image download options
     thumbDownload: 'Download thumbnail',
     fullDownload: 'Download original image',
     skipDownloadedImages: 'Skip downloaded images'
   }
-};
+}
 
 /**
  * 国际化服务类
@@ -188,8 +197,8 @@ const TEXT_DOWNLOAD_OPTIONS = {
  */
 class I18nService {
   constructor() {
-    this.language = this.detectLanguage();
-    this.texts = this.loadTexts();
+    this.language = this.detectLanguage()
+    this.texts = this.loadTexts()
   }
 
   /**
@@ -197,8 +206,8 @@ class I18nService {
    * @returns {string} 语言代码
    */
   detectLanguage() {
-    const browserLang = navigator.language || navigator.userLanguage;
-    return browserLang.includes('zh') ? 'zh' : 'en';
+    const browserLang = navigator.language || navigator.userLanguage
+    return browserLang.includes('zh') ? 'zh' : 'en'
   }
 
   /**
@@ -209,7 +218,7 @@ class I18nService {
     return {
       common: TEXT_CONSTANTS,
       download: TEXT_DOWNLOAD_OPTIONS
-    };
+    }
   }
 
   /**
@@ -220,19 +229,19 @@ class I18nService {
    * @returns {string} 格式化后的文本
    */
   get(category, key, params = {}) {
-    const categoryTexts = this.texts[category];
+    const categoryTexts = this.texts[category]
     if (!categoryTexts) {
-      console.warn(`I18n category not found: ${category}`);
-      return key;
+      console.warn(`I18n category not found: ${category}`)
+      return key
     }
 
-    const text = categoryTexts[this.language]?.[key] || categoryTexts.en?.[key];
+    const text = categoryTexts[this.language]?.[key] || categoryTexts.en?.[key]
     if (!text) {
-      console.warn(`I18n key not found: ${category}.${key}`);
-      return key;
+      console.warn(`I18n key not found: ${category}.${key}`)
+      return key
     }
 
-    return this.format(text, params);
+    return this.format(text, params)
   }
 
   /**
@@ -242,7 +251,7 @@ class I18nService {
    * @returns {string} 格式化后的文本
    */
   t(key, params = {}) {
-    return this.get('common', key, params);
+    return this.get('common', key, params)
   }
 
   /**
@@ -252,7 +261,7 @@ class I18nService {
    * @returns {string} 格式化后的文本
    */
   dt(key, params = {}) {
-    return this.get('download', key, params);
+    return this.get('download', key, params)
   }
 
   /**
@@ -263,8 +272,8 @@ class I18nService {
    */
   format(text, params = {}) {
     return text.replace(/\${([^}]+)}/g, (match, key) => {
-      return params[key.trim()] !== undefined ? params[key.trim()] : match;
-    });
+      return params[key.trim()] !== undefined ? params[key.trim()] : match
+    })
   }
 
   /**
@@ -272,12 +281,12 @@ class I18nService {
    * @returns {string} 当前语言代码
    */
   getCurrentLanguage() {
-    return this.language;
+    return this.language
   }
 }
 
 // 创建全局国际化实例
-const i18n = new I18nService();
+const i18n = new I18nService()
 
 /**
  * 页面DOM选择器常量配置
@@ -292,7 +301,8 @@ const PAGE_DOM_SELECTORS = {
     topNext: '#unext', // 顶部下一页按钮
     topPane: '#toppane', // 顶部搜索块
     searchNav: '.searchnav', // 分页导航栏
-    torrentIcon: '.gldown > a' // 下载种子icon
+    torrentIcon: '.gldown > a', // 下载种子icon
+    torrentName: '.glink' // 种子名称
   },
   // 图片详情列表页选择器 (https://exhentai.org/g/2374482/33d2ec5afc/)
   gallery: {
@@ -315,7 +325,7 @@ const PAGE_DOM_SELECTORS = {
     navBar: '.sn', // 翻页工具栏
     pageNumber: '.sn > div' // 翻页工具栏中的页码
   }
-};
+}
 
 /**
  * 页面路径配置常量
@@ -323,24 +333,24 @@ const PAGE_DOM_SELECTORS = {
 const PAGE_PATH_CONFIGS = {
   // 需要加载下载按钮的页面路径
   INCLUDE_DOWNLOAD_BUTTON_PATHS: [
-    '^/$',           // 首页
-    '^/watched',     // 已观看页面
-    '^/favorites',   // 收藏页面
-    '^/torrents',    // 种子页面
-    '^/uploader',    // 上传者页面
-    '^/popular'      // 热门页面
+    '^/$', // 首页
+    '^/watched', // 已观看页面
+    '^/favorites', // 收藏页面
+    '^/torrents', // 种子页面
+    '^/uploader', // 上传者页面
+    '^/popular' // 热门页面
   ],
-  
+
   // 需要自动加载下一页的页面路径
   AUTO_LOAD_PATHS: [
-    '^/$',           // 首页
-    '^/watched',     // 已观看页面
-    '^/favorites',   // 收藏页面
-    '^/g/',          // 画廊详情页
-    '^/s/',          // 图片详情页
-    '^/tag/'         // 标签页面
+    '^/$', // 首页
+    '^/watched', // 已观看页面
+    '^/favorites', // 收藏页面
+    '^/g/', // 画廊详情页
+    '^/s/', // 图片详情页
+    '^/tag/' // 标签页面
   ]
-};
+}
 
 /**
  * 工具类 - 提供通用辅助方法
@@ -352,7 +362,7 @@ class Utils {
    * @returns {Promise} 延迟后的Promise
    */
   static asyncTimeout(timer = 3000) {
-    return new Promise(resolve => setTimeout(resolve, timer));
+    return new Promise(resolve => setTimeout(resolve, timer))
   }
 
   /**
@@ -360,9 +370,9 @@ class Utils {
    * @param {string} css - CSS代码
    */
   static insertStyle(css) {
-    const styleElement = document.createElement('style');
-    styleElement.textContent = css;
-    document.head.appendChild(styleElement);
+    const styleElement = document.createElement('style')
+    styleElement.textContent = css
+    document.head.appendChild(styleElement)
   }
 
   /**
@@ -373,12 +383,12 @@ class Utils {
    * @returns {HTMLInputElement} 创建的按钮元素
    */
   static createButton(value, onClick, title) {
-    const button = document.createElement('input');
-    button.type = 'button';
-    button.value = value;
-    if (title) button.title = title;
-    button.addEventListener('click', onClick, false);
-    return button;
+    const button = document.createElement('input')
+    button.type = 'button'
+    button.value = value
+    if (title) button.title = title
+    button.addEventListener('click', onClick, false)
+    return button
   }
 
   /**
@@ -387,8 +397,8 @@ class Utils {
    * @returns {string} 输入框的值
    */
   static getInputValue(id) {
-    const element = document.getElementById(id);
-    return element ? element.value.trim() : '';
+    const element = document.getElementById(id)
+    return element ? element.value.trim() : ''
   }
 
   /**
@@ -397,8 +407,8 @@ class Utils {
    * @returns {boolean} 复选框是否选中
    */
   static getCheckboxState(id) {
-    const element = document.getElementById(id);
-    return element ? element.checked : false;
+    const element = document.getElementById(id)
+    return element ? element.checked : false
   }
 
   /**
@@ -408,9 +418,9 @@ class Utils {
    * @returns {HTMLElement} 创建的元素
    */
   static createElementWithContent(html, tag = 'p') {
-    const element = document.createElement(tag);
-    element.innerHTML = html;
-    return element;
+    const element = document.createElement(tag)
+    element.innerHTML = html
+    return element
   }
 
   /**
@@ -419,18 +429,18 @@ class Utils {
    * @returns {Promise<Document>} 页面DOM对象
    */
   static async fetchPageContent(url) {
-    if (!url) return document;
-    
+    if (!url) return document
+
     try {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-      
-      const html = await response.text();
-      const tempDoc = document.createElement('html');
-      tempDoc.innerHTML = html;
-      return tempDoc;
+      const response = await fetch(url)
+      if (!response.ok) throw new Error(`HTTP error: ${response.status}`)
+
+      const html = await response.text()
+      const tempDoc = document.createElement('html')
+      tempDoc.innerHTML = html
+      return tempDoc
     } catch (error) {
-      throw new Error(`Failed to fetch page: ${error.message}`);
+      throw new Error(`Failed to fetch page: ${error.message}`)
     }
   }
 
@@ -440,18 +450,18 @@ class Utils {
    * @param {string} name - 文件名
    */
   static downloadViaLink(href, name = '') {
-    const link = document.createElement('a');
-    link.download = name;
+    const link = document.createElement('a')
+    link.download = name
 
     if (typeof href === 'string') {
-      link.href = href;
+      link.href = href
     } else {
-      link.href = URL.createObjectURL(href);
+      link.href = URL.createObjectURL(href)
     }
 
-    link.click();
+    link.click()
     if (typeof href !== 'string') {
-      URL.revokeObjectURL(link.href);
+      URL.revokeObjectURL(link.href)
     }
   }
 
@@ -469,13 +479,13 @@ class Utils {
         },
         res => {
           if (res.success) {
-            resolve(res.data);
+            resolve(res.data)
           } else {
-            resolve(false);
+            resolve(false)
           }
         }
-      );
-    });
+      )
+    })
   }
 }
 
@@ -484,8 +494,8 @@ class Utils {
  */
 class ModalManager {
   constructor() {
-    this.maskClose = false;
-    this.popup = {};
+    this.maskClose = false
+    this.popup = {}
   }
 
   /**
@@ -500,34 +510,34 @@ class ModalManager {
   openModal(options) {
     // 清理现有模态框
     if (this.popup.body) {
-      this.popup.body.innerHTML = '';
-      delete this.popup.title;
-      delete this.popup.content;
-      delete this.popup.footer;
+      this.popup.body.innerHTML = ''
+      delete this.popup.title
+      delete this.popup.content
+      delete this.popup.footer
     } else {
-      this.createModalStructure();
+      this.createModalStructure()
     }
 
     // 配置遮罩点击关闭
-    this.configureMaskClose(options.maskClose);
+    this.configureMaskClose(options.maskClose)
 
     // 添加各区域内容
-    if (options.title) this.addTitle(options.title);
-    if (options.content) this.addContent(options.content);
-    if (options.footer) this.addFooter(options.footer);
+    if (options.title) this.addTitle(options.title)
+    if (options.content) this.addContent(options.content)
+    if (options.footer) this.addFooter(options.footer)
 
     // 显示模态框
-    this.popup.overlay.appendChild(this.popup.body);
-    document.body.appendChild(this.popup.overlay);
+    this.popup.overlay.appendChild(this.popup.body)
+    document.body.appendChild(this.popup.overlay)
 
-    return this.popup;
+    return this.popup
   }
 
   /**
    * 创建模态框基本结构
    */
   createModalStructure() {
-    const overlay = document.createElement('div');
+    const overlay = document.createElement('div')
     overlay.style = `
       background: rgba(0,0,0,.7);
       position: fixed;
@@ -536,10 +546,10 @@ class ModalManager {
       bottom: 0;
       right: 0;
       z-index: 9999;
-    `;
+    `
 
-    const modalBody = document.createElement('div');
-    modalBody.id = 'popup-body';
+    const modalBody = document.createElement('div')
+    modalBody.id = 'popup-body'
     modalBody.style = `
       position: absolute;
       background: #363940;
@@ -555,13 +565,13 @@ class ModalManager {
       transform: translate(-50%, -30%);
       text-align: left;
       color: #fff;
-    `;
+    `
 
     // 阻止模态框内部点击事件冒泡到遮罩
-    modalBody.addEventListener('click', e => e.stopPropagation(), false);
+    modalBody.addEventListener('click', e => e.stopPropagation(), false)
 
-    this.popup.overlay = overlay;
-    this.popup.body = modalBody;
+    this.popup.overlay = overlay
+    this.popup.body = modalBody
   }
 
   /**
@@ -570,11 +580,11 @@ class ModalManager {
    */
   configureMaskClose(maskClose) {
     if (maskClose) {
-      this.maskClose = true;
-      this.popup.overlay.addEventListener('click', () => this.closeModal(), false);
+      this.maskClose = true
+      this.popup.overlay.addEventListener('click', () => this.closeModal(), false)
     } else {
-      this.maskClose = false;
-      this.popup.overlay.removeEventListener('click', () => this.closeModal(), false);
+      this.maskClose = false
+      this.popup.overlay.removeEventListener('click', () => this.closeModal(), false)
     }
   }
 
@@ -583,17 +593,17 @@ class ModalManager {
    * @param {string|HTMLElement} title - 标题内容
    */
   addTitle(title) {
-    this.popup.title = document.createElement('h3');
-    this.popup.title.style.margin = '0 0 15px 0';
-    this.popup.title.style.color = '#fff';
+    this.popup.title = document.createElement('h3')
+    this.popup.title.style.margin = '0 0 15px 0'
+    this.popup.title.style.color = '#fff'
 
     if (typeof title === 'string') {
-      this.popup.title.innerHTML = title;
+      this.popup.title.innerHTML = title
     } else {
-      this.popup.title.appendChild(title);
+      this.popup.title.appendChild(title)
     }
 
-    this.popup.body.appendChild(this.popup.title);
+    this.popup.body.appendChild(this.popup.title)
   }
 
   /**
@@ -601,28 +611,28 @@ class ModalManager {
    * @param {string|HTMLElement|boolean} content - 内容
    */
   addContent(content) {
-    this.popup.content = document.createElement('div');
+    this.popup.content = document.createElement('div')
     this.popup.content.style = `
       padding-bottom: 20px;
       overflow-y: auto;
       max-height: 60vh;
       color: #ddd;
-    `;
+    `
 
     if (typeof content === 'string') {
-      this.popup.content.innerHTML = content;
+      this.popup.content.innerHTML = content
     } else if (content !== true) {
-      this.popup.content.appendChild(content);
+      this.popup.content.appendChild(content)
     }
 
-    this.popup.body.appendChild(this.popup.content);
+    this.popup.body.appendChild(this.popup.content)
 
     // 添加动态内容追加方法
     this.popup.appendContent = (...args) => {
-      const elements = args.map(content => Utils.createElementWithContent(content));
-      this.popup.content.append(...elements);
+      const elements = args.map(content => Utils.createElementWithContent(content))
+      this.popup.content.append(...elements)
       // this.popup.content.scrollTop = this.popup.content.scrollHeight;
-    };
+    }
   }
 
   /**
@@ -630,28 +640,28 @@ class ModalManager {
    * @param {string|HTMLElement|Array} footer - 底部内容
    */
   addFooter(footer) {
-    this.popup.footer = document.createElement('div');
-    this.popup.footer.style = 'display: flex; padding-top: 10px; gap: 10px; justify-content: center';
+    this.popup.footer = document.createElement('div')
+    this.popup.footer.style = 'display: flex; padding-top: 10px; gap: 10px; justify-content: center'
 
     if (Array.isArray(footer)) {
-      footer.forEach(item => this.popup.footer.appendChild(item));
+      footer.forEach(item => this.popup.footer.appendChild(item))
     } else {
-      this.popup.footer.appendChild(footer);
+      this.popup.footer.appendChild(footer)
     }
 
-    this.popup.body.appendChild(this.popup.footer);
+    this.popup.body.appendChild(this.popup.footer)
   }
 
   /**
    * 关闭模态框
    */
   closeModal() {
-    if (!this.maskClose) return;
+    if (!this.maskClose) return
 
     if (this.popup.overlay && document.body.contains(this.popup.overlay)) {
-      document.body.removeChild(this.popup.overlay);
+      document.body.removeChild(this.popup.overlay)
     }
-    this.popup = {};
+    this.popup = {}
   }
 
   /**
@@ -659,7 +669,7 @@ class ModalManager {
    * @returns {Object} 模态框对象
    */
   getCurrentPopup() {
-    return this.popup;
+    return this.popup
   }
 }
 
@@ -668,55 +678,56 @@ class ModalManager {
  */
 class TorrentDownloader {
   constructor(modalManager) {
-    this.taskID = '';
-    this.maxDownloads = 0;
-    this.downloadParams = {};
-    this.status = 'pending';
-    this.modalManager = modalManager;
-    this.i18n = i18n; // 使用国际化服务
-    this.init();
+    this.taskID = ''
+    this.maxDownloads = 0
+    this.downloadParams = {}
+    this.status = 'pending'
+    this.modalManager = modalManager
+    this.i18n = i18n // 使用国际化服务
+    this.init()
   }
 
   /**
    * 初始化种子下载功能
    */
   init() {
-    this.createDownloadButton();
+    this.createDownloadButton()
   }
 
   /**
    * 创建批量下载按钮并添加到页面
    */
   createDownloadButton() {
-    const { pathname } = document.location;
-    
-    const shouldAddButton = PAGE_PATH_CONFIGS.INCLUDE_DOWNLOAD_BUTTON_PATHS
-      .some(pattern => new RegExp(pattern).test(pathname));
+    const { pathname } = document.location
 
-    if (!shouldAddButton) return;
+    const shouldAddButton = PAGE_PATH_CONFIGS.INCLUDE_DOWNLOAD_BUTTON_PATHS.some(pattern =>
+      new RegExp(pattern).test(pathname)
+    )
+
+    if (!shouldAddButton) return
 
     const downloadBtn = Utils.createButton(
       this.i18n.t('downloadAllTorrentBtn'),
       () => this.openDownloadModal(),
       this.i18n.t('downloadAllTorrentTitle')
-    );
+    )
 
     // 尝试在表单中插入按钮
-    const formElement = document.querySelector('form');
+    const formElement = document.querySelector('form')
     if (formElement) {
-      const existingButtons = formElement.querySelectorAll("input[type='button']");
+      const existingButtons = formElement.querySelectorAll("input[type='button']")
       if (existingButtons.length) {
-        const lastButton = existingButtons[existingButtons.length - 1];
-        lastButton.parentNode.insertBefore(downloadBtn, lastButton.nextElementSibling);
+        const lastButton = existingButtons[existingButtons.length - 1]
+        lastButton.parentNode.insertBefore(downloadBtn, lastButton.nextElementSibling)
       }
     } else {
       // 表单不存在时，在顶部面板添加按钮
-      const topPane = document.querySelector(PAGE_DOM_SELECTORS.home.topPane);
+      const topPane = document.querySelector(PAGE_DOM_SELECTORS.home.topPane)
       if (topPane) {
-        const buttonContainer = document.createElement('div');
-        buttonContainer.style = 'text-align:center';
-        buttonContainer.appendChild(downloadBtn);
-        topPane.appendChild(buttonContainer);
+        const buttonContainer = document.createElement('div')
+        buttonContainer.style = 'text-align:center'
+        buttonContainer.appendChild(downloadBtn)
+        topPane.appendChild(buttonContainer)
       }
     }
   }
@@ -726,22 +737,22 @@ class TorrentDownloader {
    */
   async openDownloadModal() {
     // 获取已下载种子数量
-    const downloadedCount = await this.getDownloadedCount();
+    const downloadedCount = await this.getDownloadedCount()
 
     // 创建按钮
     const startBtn = Utils.createButton(this.i18n.dt('startDownload'), () => {
-      const params = this.collectDownloadParams();
-      this.downloadAllTorrents(params);
-    });
-    
-    const cancelBtn = Utils.createButton(this.i18n.dt('cancel'), () => this.modalManager.closeModal());
+      const params = this.collectDownloadParams()
+      this.downloadAllTorrents(params)
+    })
+
+    const cancelBtn = Utils.createButton(this.i18n.dt('cancel'), () => this.modalManager.closeModal())
 
     this.modalManager.openModal({
       maskClose: true,
       title: this.i18n.dt('downloadConfig'),
       content: this.createModalContent(downloadedCount),
       footer: [startBtn, cancelBtn]
-    });
+    })
   }
 
   /**
@@ -750,11 +761,10 @@ class TorrentDownloader {
    */
   async getDownloadedCount() {
     return new Promise(resolve => {
-      chrome.runtime.sendMessage(
-        { type: 'DB', payload: { module: 'torrent', action: 'getTotalCount' } },
-        res => resolve(res.success ? res.data : 0)
-      );
-    });
+      chrome.runtime.sendMessage({ type: 'DB', payload: { module: 'torrent', action: 'getTotalCount' } }, res =>
+        resolve(res.success ? res.data : 0)
+      )
+    })
   }
 
   /**
@@ -769,7 +779,7 @@ class TorrentDownloader {
       skipDownloaded: Utils.getCheckboxState('skip-downloaded'),
       stopDownloaded: Utils.getCheckboxState('stop-downloaded'),
       downloadPath: Utils.getInputValue('download-path')
-    };
+    }
   }
 
   /**
@@ -778,24 +788,38 @@ class TorrentDownloader {
    * @returns {HTMLElement} 模态框内容元素
    */
   createModalContent(downloadedCount) {
-    const content = document.createElement('div');
-    content.className = 'searchadv';
+    const content = document.createElement('div')
+    content.className = 'searchadv'
     content.innerHTML = `
       <div>
-        <div>${this.i18n.dt('maxDownloads')} <input type="text" id="max-downloads" size="4" maxlength="4"/> ${this.i18n.dt('torrents')}</div>
-        <div>${this.i18n.dt('maxPages')} <input type="text" id="max-pages" size="4" maxlength="4" /> ${this.i18n.dt('pages')}</div>
+        <div>${this.i18n.dt(
+          'maxDownloads'
+        )} <input type="text" id="max-downloads" size="4" maxlength="4"/> ${this.i18n.dt('torrents')}</div>
+        <div>${this.i18n.dt('maxPages')} <input type="text" id="max-pages" size="4" maxlength="4" /> ${this.i18n.dt(
+      'pages'
+    )}</div>
         <div title="${this.i18n.dt('stopAtTorrentTitle')}">
-          ${this.i18n.dt('stopAtTorrentLabel')} <input type="text" id="stop-at-torrent" placeholder="url" style="width:60px" /> ${this.i18n.dt('stopAtTorrentEnd')}
+          ${this.i18n.dt(
+            'stopAtTorrentLabel'
+          )} <input type="text" id="stop-at-torrent" placeholder="url" style="width:60px" /> ${this.i18n.dt(
+      'stopAtTorrentEnd'
+    )}
         </div>
       </div>
 
       <div>
-        <div><label class="lc"><input checked type="checkbox" id="skip-downloaded"><span></span> ${this.i18n.dt('skipDownloaded')}</label></div>
-        <div><label class="lc"><input type="checkbox" id="stop-downloaded"><span></span> ${this.i18n.dt('stopDownloaded')}</label></div>
+        <div><label class="lc"><input checked type="checkbox" id="skip-downloaded"><span></span> ${this.i18n.dt(
+          'skipDownloaded'
+        )}</label></div>
+        <div><label class="lc"><input type="checkbox" id="stop-downloaded"><span></span> ${this.i18n.dt(
+          'stopDownloaded'
+        )}</label></div>
       </div>
 
       <div>
-        ${this.i18n.dt('downloadedCount')} <span id="downloaded-count">${downloadedCount}</span> ${this.i18n.dt('torrentsCount')}. 
+        ${this.i18n.dt('downloadedCount')} <span id="downloaded-count">${downloadedCount}</span> ${this.i18n.dt(
+      'torrentsCount'
+    )}. 
         [<a href="javascript:void(0);" id="clear-downloaded">${this.i18n.dt('clearDownloaded')}</a>]
       </div>
 
@@ -809,10 +833,10 @@ class TorrentDownloader {
       <div>
         <input type="text" id="download-path" placeholder="${this.i18n.dt('folderPlaceholder')}" style="width:200px" />
       </div>
-    `;
+    `
 
-    this.bindModalEvents(content);
-    return content;
+    this.bindModalEvents(content)
+    return content
   }
 
   /**
@@ -822,31 +846,31 @@ class TorrentDownloader {
   bindModalEvents(content) {
     setTimeout(() => {
       // 清除下载记录事件
-      const clearBtn = content.querySelector('#clear-downloaded');
+      const clearBtn = content.querySelector('#clear-downloaded')
       if (clearBtn) {
         clearBtn.addEventListener('click', e => {
-          e.preventDefault();
+          e.preventDefault()
           if (confirm(this.i18n.dt('clearDownloadedConfirm'))) {
             chrome.runtime.sendMessage({
               type: 'DB',
               payload: { module: 'torrent', action: 'clearData' }
-            });
-            
-            const countSpan = content.querySelector('#downloaded-count');
-            if (countSpan) countSpan.textContent = '0';
+            })
+
+            const countSpan = content.querySelector('#downloaded-count')
+            if (countSpan) countSpan.textContent = '0'
           }
-        });
+        })
       }
 
       // 显示默认文件夹事件
-      const selectPathBtn = content.querySelector('#show-default-folder');
+      const selectPathBtn = content.querySelector('#show-default-folder')
       if (selectPathBtn) {
         selectPathBtn.addEventListener('click', e => {
-          e.preventDefault();
-          chrome.runtime.sendMessage({ type: 'DOWNLOAD_PATH' });
-        });
+          e.preventDefault()
+          chrome.runtime.sendMessage({ type: 'DOWNLOAD_PATH' })
+        })
       }
-    }, 0);
+    }, 0)
   }
 
   /**
@@ -855,50 +879,52 @@ class TorrentDownloader {
    */
   async downloadAllTorrents(params) {
     // 创建任务
-    this.downloadParams = params;
-    const payload = { module: 'torrentTask', action: 'createTask', data: { params } };
-    this.taskID = await Utils.useDatabase(payload);
+    this.downloadParams = params
+    const payload = { module: 'torrentTask', action: 'createTask', data: { params } }
+    this.taskID = await Utils.useDatabase(payload)
 
     // 打开下载进度模态框
-    const popup = this.openDownloadProgressModal(params);
-    let currentPage = 1;
-    let currentDom = document;
+    const popup = this.openDownloadProgressModal(params)
+    let currentPage = 1
+    let currentDom = document
 
     // 循环处理所有分页
     while (currentDom) {
-      popup.appendContent(this.i18n.t('pageLabel', { currentPage }));
+      popup.appendContent(this.i18n.t('pageLabel', { currentPage }))
 
       try {
-        await this.collectTorrentLinks(currentDom, popup);
+        await this.collectTorrentLinks(currentDom, popup)
       } catch (err) {
-        currentDom = null;
-        popup.appendContent(`<li>${err.message} - ${this.i18n.dt('stopAllDownloads')}</li>`);
-        break;
+        currentDom = null
+        popup.appendContent(`<li>${err.message} - ${this.i18n.dt('stopAllDownloads')}</li>`)
+        break
       }
 
       // 获取下一页
-      const nextPageElement = currentDom.querySelector(PAGE_DOM_SELECTORS.home.topNext);
-      const nextPageUrl = nextPageElement?.href;
+      const nextPageElement = currentDom.querySelector(PAGE_DOM_SELECTORS.home.topNext)
+      const nextPageUrl = nextPageElement?.href
 
       if (nextPageUrl) {
-        currentPage++;
-        
+        currentPage++
+
         if (params.maxPages && currentPage > params.maxPages) {
-          currentDom = null;
-          popup.appendContent(`<li>${this.i18n.t('reachMaxPages', { 
-            maxPages: params.maxPages, 
-            stopAllDownloads: this.i18n.dt('stopAllDownloads') 
-          })}</li>`);
-          break;
+          currentDom = null
+          popup.appendContent(
+            `<li>${this.i18n.t('reachMaxPages', {
+              maxPages: params.maxPages,
+              stopAllDownloads: this.i18n.dt('stopAllDownloads')
+            })}</li>`
+          )
+          break
         }
 
-        currentDom = await Utils.fetchPageContent(nextPageUrl);
+        currentDom = await Utils.fetchPageContent(nextPageUrl)
       } else {
-        currentDom = null;
+        currentDom = null
       }
     }
 
-    popup.appendContent(this.i18n.t('downloadCompleteMsg'));
+    popup.appendContent(this.i18n.t('downloadCompleteMsg'))
   }
 
   /**
@@ -907,46 +933,38 @@ class TorrentDownloader {
    * @returns {Object} 模态框对象
    */
   openDownloadProgressModal(params) {
-    let content = '<div style="font-size: 10pt; text-align: center;">';
-    
+    let content = '<div style="font-size: 10pt; text-align: center;">'
+
     if (params.maxDownloads > 0) {
-      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('maxDownloads')} ${params.maxDownloads} ${this.i18n.dt('torrents')}]</span>`;  
+      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('maxDownloads')} ${
+        params.maxDownloads
+      } ${this.i18n.dt('torrents')}]</span>`
     }
     if (params.maxPages > 0) {
-      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('maxPages')} ${params.maxPages} ${this.i18n.dt('pages')}]</span>`;  
+      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('maxPages')} ${
+        params.maxPages
+      } ${this.i18n.dt('pages')}]</span>`
     }
     if (params.stopAtTorrent) {
-      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('stopAtTorrentLabel')} ${params.stopAtTorrent} ${this.i18n.dt('stopAtTorrentEnd')}]</span>`;  
-      this.parseStopAtTorrent(params);
+      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('stopAtTorrentLabel')} ${
+        params.stopAtTorrent
+      } ${this.i18n.dt('stopAtTorrentEnd')}]</span>`
+      params.stopAtTorrent = this.extractGalleryIdFromUrl(params.stopAtTorrent, 'pathname')
     }
     if (params.downloadPath) {
-      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.t('saveToFolder', { downloadPath: params.downloadPath })}]</span>`;  
+      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.t('saveToFolder', {
+        downloadPath: params.downloadPath
+      })}]</span>`
     }
     if (params.skipDownloaded) {
-      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('skipDownloaded')}]</span>`;  
+      content += `<span style='padding: 2px 6px; display:inline-block'>[${this.i18n.dt('skipDownloaded')}]</span>`
     }
-    content += '</div>';
-
+    content += '</div>'
 
     return this.modalManager.openModal({
       title: this.i18n.t('downloadModalTitle'),
       content: content
-    });
-  }
-
-  /**
-   * 解析停止条件中的画廊ID
-   * @param {Object} params - 下载参数
-   */
-  parseStopAtTorrent(params) {
-    try {
-      const [, a, b] = new URL(params.stopAtTorrent).pathname.match(/([0-9A-Za-z]+)/g);
-      if (a && b) {
-        params.stopAtTorrent = `${a}-${b}`;
-      }
-    } catch (error) {
-      console.log('stopAtTorrent格式错误', params.stopAtTorrent);
-    }
+    })
   }
 
   /**
@@ -955,43 +973,46 @@ class TorrentDownloader {
    * @param {Object} popup - 模态框对象
    */
   async collectTorrentLinks(dom, popup) {
-    const urls = this.extractTorrentUrls(dom);
-    const iframe = this.createIframe('iframe-download-all');
+    const urls = this.extractTorrentUrls(dom)
+    const iframe = this.createIframe('iframe-download-all')
 
-    for (const url of urls) {
-      if (!url) continue;
+    for (const item of urls) {
+      if (!item.id) continue
 
       // 检查下载数量限制
       if (this.downloadParams.maxDownloads && this.maxDownloads >= this.downloadParams.maxDownloads) {
-        throw new Error(this.i18n.t('exceedMaxDownloads', { 
-          maxDownloads: this.downloadParams.maxDownloads 
-        }));
+        throw new Error(
+          this.i18n.t('exceedMaxDownloads', {
+            maxDownloads: this.downloadParams.maxDownloads
+          })
+        )
       }
 
-      const torrentID = this.extractGalleryIdFromUrl(url);
-      if (!torrentID) continue;
+      // const torrentID = this.extractGalleryIdFromUrl(item.tLink);
+      // if (!torrentID) continue;
 
       // 检查停止条件
-      if (this.checkStopCondition(torrentID)) {
-        throw new Error(this.i18n.t('reachSpecifiedGallery'));
+      if (this.checkStopCondition(item.id)) {
+        throw new Error(this.i18n.t('reachSpecifiedGallery'))
       }
 
+      if (!item.tLink) continue
+
       // 检查种子是否已存在
-      const isExist = await this.checkTorrentExists(torrentID);
+      const isExist = await this.checkTorrentExists(item.id)
       if (isExist) {
-        await this.handleExistingTorrent(torrentID, popup, url);
-        if (this.downloadParams.stopDownloaded) {
-          // 如果设置了遇到已存在种子停止下载，则跳出循环
-          break;
+        await this.handleExistingTorrent(popup, item)
+
+        if (this.downloadParams.skipDownloaded) {
+          continue
         }
-        continue;
       }
 
       // 下载种子
-      await this.downloadTorrent(iframe, url, popup, torrentID);
-      
-      this.maxDownloads++;
-      await Utils.asyncTimeout(1000);
+      await this.downloadTorrent(iframe, popup, item, isExist)
+
+      this.maxDownloads++
+      await Utils.asyncTimeout(1000)
     }
   }
 
@@ -1001,18 +1022,41 @@ class TorrentDownloader {
    * @returns {Array<string>} 种子URL数组
    */
   extractTorrentUrls(dom) {
-    const isTorrentPage = location.pathname.startsWith('/torrents');
-    
+    const isTorrentPage = location.pathname.startsWith('/torrents')
+
     if (isTorrentPage) {
       return Array.from(
-        dom.querySelector(PAGE_DOM_SELECTORS.home.contentBody)
-          .querySelectorAll('a[rel="nofollow"]')
-      ).map(link => link.href?.replace(/&gtid=\d+/, ''));
+        dom.querySelector(PAGE_DOM_SELECTORS.home.contentBody).querySelectorAll('a[rel="nofollow"]')
+      ).map(link => {
+        const url = link.href?.replace(/&gtid=\d+/, '')
+        return {
+          tLink: url,
+          gLink: url,
+          id: this.extractGalleryIdFromUrl(url),
+          name: link.textContent?.trim()
+        }
+      })
     } else {
-      return Array.from(
-        dom.querySelector(PAGE_DOM_SELECTORS.home.contentBody)
-          .querySelectorAll(PAGE_DOM_SELECTORS.home.torrentIcon)
-      ).map(link => link?.href);
+      const body = dom.querySelector(PAGE_DOM_SELECTORS.home.contentBody)
+      const parentTagName = body.tagName === 'TABLE' ? 'tr' : 'div'
+      const list = body.querySelectorAll(PAGE_DOM_SELECTORS.home.torrentName)
+
+      return Array.from(list).map(el => {
+        // torrent link, gallery link,
+        const name = el.textContent?.trim()
+        const gLink = el.parentElement?.href
+
+        const dom = el.parentElement.closest(parentTagName)
+        const tLink = dom.querySelector(PAGE_DOM_SELECTORS.home.torrentIcon)?.href
+        const id = this.extractGalleryIdFromUrl(gLink, 'pathname')
+
+        return {
+          tLink,
+          gLink,
+          id,
+          name
+        }
+      })
     }
   }
 
@@ -1021,12 +1065,18 @@ class TorrentDownloader {
    * @param {string} url - 画廊URL
    * @returns {string|null} 画廊ID
    */
-  extractGalleryIdFromUrl(url) {
+  extractGalleryIdFromUrl(url, type = 'search') {
     try {
-      const [, galleryId, , galleryToken] = new URL(url).search.match(/([0-9A-Za-z]+)/g) || [];
-      return galleryId && galleryToken ? `${galleryId}-${galleryToken}` : null;
+      if (type === 'search') {
+        const [, galleryId, , galleryToken] = new URL(url).search.match(/([0-9A-Za-z]+)/g) || []
+        return galleryId && galleryToken ? `${galleryId}-${galleryToken}` : null
+      } else if (type === 'pathname') {
+        const [, a, b] = new URL(url).pathname.match(/([0-9A-Za-z]+)/g)
+        return a && b ? `${a}-${b}` : null
+      }
     } catch (error) {
-      return null;
+      console.log('extractGalleryIdFromUrl', error)
+      return null
     }
   }
 
@@ -1036,7 +1086,7 @@ class TorrentDownloader {
    * @returns {boolean} 是否应该停止
    */
   checkStopCondition(torrentID) {
-    return this.downloadParams.stopAtTorrent && torrentID === this.downloadParams.stopAtTorrent;
+    return this.downloadParams.stopAtTorrent && torrentID === this.downloadParams.stopAtTorrent
   }
 
   /**
@@ -1045,7 +1095,7 @@ class TorrentDownloader {
    * @returns {Promise<boolean>} 是否存在
    */
   async checkTorrentExists(torrentID) {
-    return await Utils.useDatabase({ module: 'torrent', action: 'isTorrentExist', data: torrentID });
+    return await Utils.useDatabase({ module: 'torrent', action: 'isTorrentExist', data: torrentID })
   }
 
   /**
@@ -1055,18 +1105,20 @@ class TorrentDownloader {
    * @param {string} url - 画廊URL
    * @returns {Promise<void>}
    */
-  async handleExistingTorrent(torrentID, popup, url) {
-    const link = `https://exhentai.org/g/${torrentID.replace('-', '/')}`;
-
+  async handleExistingTorrent(popup, item) {
     // 已存在且设置停止下载
     if (this.downloadParams.stopDownloaded) {
       await Utils.useDatabase({
         module: 'torrentTask',
         action: 'updateTask',
         data: [this.taskID, { skipCountAdd: 1, status: 'completed' }]
-      });
-      popup.appendContent(`[${this.i18n.t('torrentExist')} 结束] - <a href="${link}" target="_blank">${link}</a>`);
-      throw new Error(this.i18n.t('stopAtExistingTorrent'));
+      })
+      popup.appendContent(
+        `<small>[${this.i18n.t('torrentExist')} ${this.i18n.t('torrentOver')}] - <a href="${
+          item.gLink
+        }" target="_blank">${item.name} </a></small>`
+      )
+      throw new Error(this.i18n.t('stopAtExistingTorrent'))
     }
 
     // 已存在且设置跳过
@@ -1075,11 +1127,19 @@ class TorrentDownloader {
         module: 'torrentTask',
         action: 'updateTask',
         data: [this.taskID, { skipCountAdd: 1 }]
-      });
-      popup.appendContent(`[${this.i18n.t('torrentExist')} 跳过] - <a href="${link}" target="_blank">${link}</a>`);
+      })
+      popup.appendContent(
+        `<small>[${this.i18n.t('torrentExist')} ${this.i18n.t('torrentSkip')}] - <a href="${
+          item.gLink
+        }" target="_blank">${item.name} </a></small>`
+      )
     } else {
       // 已存在但不跳过，仍然显示存在信息
-      popup.appendContent(`[${this.i18n.t('torrentExist')}] - <a href="${link}" target="_blank">${link}</a>`);
+      popup.appendContent(
+        `<small>[${this.i18n.t('torrentExist')} ${this.i18n.t('torrentContinue')}] - <a href="${
+          item.gLink
+        }" target="_blank">${item.name} </a></small>`
+      )
     }
   }
 
@@ -1091,39 +1151,35 @@ class TorrentDownloader {
    * @param {string} torrentID - 画廊ID
    * @returns {Promise<void>}
    */
-  async downloadTorrent(iframe, url, popup, torrentID) {
-    await this.loadIframeContent(iframe, url);
-    const latestTorrent = this.extractLatestTorrent(iframe.contentDocument);
-    
+  async downloadTorrent(iframe, popup, item, isExist) {
+    await this.loadIframeContent(iframe, item.tLink)
+    const latestTorrent = this.extractLatestTorrent(iframe.contentDocument)
+
     if (!latestTorrent.torrentUrl) {
-      popup.appendContent(`<li>${this.i18n.t('torrentFileNotFound', { url })}</li>`);
-      return;
+      popup.appendContent(`<li>${this.i18n.t('torrentFileNotFound', { url: item.gLink })}</li>`)
+      return
     }
 
-    const pageTitle = iframe.contentDocument.querySelector('h1')?.innerText || this.i18n.t('unknownGallery');
-    const isExist = await Utils.useDatabase({
-      module: 'torrent',
-      action: 'isTorrentExist',
-      data: torrentID
-    });
+    const pageTitle = item.name || item.gLink
 
-    const tmpTitle = isExist ? `[${this.i18n.t('torrentExist')} 下载] ${pageTitle}` : pageTitle;
-    popup.appendContent(`<a href="${url}" target="_blank">${tmpTitle}</a>`);
+    if (!isExist) {
+      popup.appendContent(`<small><a href="${item.gLink}" target="_blank">${pageTitle} </a></small>`)
+    }
 
-    this.downloadFile(latestTorrent.torrentUrl, latestTorrent.fileName);
+    this.downloadFile(latestTorrent.torrentUrl, latestTorrent.fileName)
 
     // 记录到数据库
     await Utils.useDatabase({
       module: 'torrent',
       action: 'createTorrent',
-      data: { id: torrentID, name: pageTitle }
-    });
-    
+      data: { id: item.id, name: pageTitle }
+    })
+
     await Utils.useDatabase({
       module: 'torrentTask',
       action: 'updateTask',
       data: [this.taskID, { completedCountAdd: 1 }]
-    });
+    })
   }
 
   /**
@@ -1132,24 +1188,24 @@ class TorrentDownloader {
    * @returns {Object} 种子信息
    */
   extractLatestTorrent(iframeDoc) {
-    const torrentForms = iframeDoc.querySelectorAll('form');
-    let latestTorrent = { date: 0, torrentUrl: '', fileName: '' };
+    const torrentForms = iframeDoc.querySelectorAll('form')
+    let latestTorrent = { date: 0, torrentUrl: '', fileName: '' }
 
     torrentForms.forEach(form => {
-      const dateText = form.querySelector('td > span:last-child')?.textContent;
-      const dateTime = new Date(dateText).getTime();
-      const torrentLink = form.querySelector('a');
+      const dateText = form.querySelector('td > span:last-child')?.textContent
+      const dateTime = new Date(dateText).getTime()
+      const torrentLink = form.querySelector('a')
 
       if (torrentLink && latestTorrent.date < dateTime) {
         latestTorrent = {
           date: dateTime,
           torrentUrl: torrentLink.href,
           fileName: torrentLink.innerText + '.torrent'
-        };
+        }
       }
-    });
+    })
 
-    return latestTorrent;
+    return latestTorrent
   }
 
   /**
@@ -1161,7 +1217,7 @@ class TorrentDownloader {
     chrome.runtime.sendMessage({
       type: 'DOWNLOAD',
       payload: { url, filename, filepath: this.downloadParams.downloadPath }
-    });
+    })
   }
 
   /**
@@ -1172,9 +1228,9 @@ class TorrentDownloader {
    */
   loadIframeContent(iframe, src) {
     return new Promise(resolve => {
-      iframe.src = src;
-      iframe.onload = () => resolve();
-    });
+      iframe.src = src
+      iframe.onload = () => resolve()
+    })
   }
 
   /**
@@ -1183,16 +1239,16 @@ class TorrentDownloader {
    * @returns {HTMLIFrameElement} iframe元素
    */
   createIframe(id) {
-    let iframe = document.querySelector(`#${id}`);
-    if (iframe) return iframe;
+    let iframe = document.querySelector(`#${id}`)
+    if (iframe) return iframe
 
-    iframe = document.createElement('iframe');
-    iframe.id = id;
-    iframe.width = 0;
-    iframe.height = 0;
-    iframe.style.display = 'none';
-    document.body.appendChild(iframe);
-    return iframe;
+    iframe = document.createElement('iframe')
+    iframe.id = id
+    iframe.width = 0
+    iframe.height = 0
+    iframe.style.display = 'none'
+    document.body.appendChild(iframe)
+    return iframe
   }
 }
 
@@ -1201,10 +1257,10 @@ class TorrentDownloader {
  */
 class ImageDownloader {
   constructor(modalManager) {
-    this.modalManager = modalManager;
-    this.downloadParams = {};
-    this.i18n = i18n; // 使用国际化服务
-    this.init();
+    this.modalManager = modalManager
+    this.downloadParams = {}
+    this.i18n = i18n // 使用国际化服务
+    this.init()
   }
 
   /**
@@ -1212,7 +1268,7 @@ class ImageDownloader {
    */
   init() {
     if (new RegExp('^/g/').test(location.pathname)) {
-      this.initDownloadFullImage();
+      this.initDownloadFullImage()
     }
   }
 
@@ -1232,35 +1288,35 @@ class ImageDownloader {
         font-size:10pt;
       }
       .custom-btn + .custom-btn{margin-left: 12px;}
-    `);
+    `)
 
     // 创建下载按钮
-    const downloadBtn = document.createElement('div');
-    downloadBtn.className = 'tha nosel custom-btn';
-    downloadBtn.innerText = this.i18n.t('downloadAllImagesBtn');
-    downloadBtn.title = this.i18n.t('downloadAllImagesTitle');
-    downloadBtn.addEventListener('click', () => this.handleDownloadFullImage(), false);
+    const downloadBtn = document.createElement('div')
+    downloadBtn.className = 'tha nosel custom-btn'
+    downloadBtn.innerText = this.i18n.t('downloadAllImagesBtn')
+    downloadBtn.title = this.i18n.t('downloadAllImagesTitle')
+    downloadBtn.addEventListener('click', () => this.handleDownloadFullImage(), false)
 
     // 创建按钮容器
-    const buttonContainer = document.createElement('div');
-    buttonContainer.style = 'text-align:center; margin-bottom: 5px';
-    buttonContainer.appendChild(downloadBtn);
+    const buttonContainer = document.createElement('div')
+    buttonContainer.style = 'text-align:center; margin-bottom: 5px'
+    buttonContainer.appendChild(downloadBtn)
 
     // 将按钮插入到顶部导航上方
-    const topNav = document.querySelector(PAGE_DOM_SELECTORS.gallery.topNav);
-    topNav?.parentNode?.insertBefore(buttonContainer, topNav);
+    const topNav = document.querySelector(PAGE_DOM_SELECTORS.gallery.topNav)
+    topNav?.parentNode?.insertBefore(buttonContainer, topNav)
   }
 
   /**
    * 处理下载原图的点击事件
    */
   async handleDownloadFullImage() {
-    const torrentCount = this.getTorrentCount();
+    const torrentCount = this.getTorrentCount()
 
     if (torrentCount > 0) {
-      this.showDownloadSelectionModal(torrentCount);
+      this.showDownloadSelectionModal(torrentCount)
     } else {
-      this.openDownloadModal();
+      this.openDownloadModal()
     }
   }
 
@@ -1269,9 +1325,9 @@ class ImageDownloader {
    * @returns {number} 种子数量
    */
   getTorrentCount() {
-    const torrentLinks = Array.from(document.querySelectorAll(PAGE_DOM_SELECTORS.gallery.asidePane));
-    const torrentLink = torrentLinks.find(link => /torrent.*\d+/i.test(link.innerText));
-    return torrentLink ? parseInt(torrentLink.innerText.match(/\d+/)[0], 10) : 0;
+    const torrentLinks = Array.from(document.querySelectorAll(PAGE_DOM_SELECTORS.gallery.asidePane))
+    const torrentLink = torrentLinks.find(link => /torrent.*\d+/i.test(link.innerText))
+    return torrentLink ? parseInt(torrentLink.innerText.match(/\d+/)[0], 10) : 0
   }
 
   /**
@@ -1280,27 +1336,31 @@ class ImageDownloader {
    */
   showDownloadSelectionModal(torrentCount) {
     // 创建继续下载图片按钮
-    const imageBtn = document.createElement('div');
-    imageBtn.innerText = this.i18n.t('continueDownloadImages');
-    imageBtn.className = 'tha nosel custom-btn';
-    imageBtn.addEventListener('click', () => this.openDownloadModal(), false);
+    const imageBtn = document.createElement('div')
+    imageBtn.innerText = this.i18n.t('continueDownloadImages')
+    imageBtn.className = 'tha nosel custom-btn'
+    imageBtn.addEventListener('click', () => this.openDownloadModal(), false)
 
     // 创建下载种子按钮
-    const torrentBtn = document.createElement('div');
-    torrentBtn.innerText = this.i18n.t('downloadTorrentFile');
-    torrentBtn.className = 'ths nosel custom-btn';
-    torrentBtn.addEventListener('click', () => {
-      const torrentLink = this.findTorrentLink();
-      if (torrentLink) torrentLink.click();
-      this.modalManager.closeModal();
-    }, false);
+    const torrentBtn = document.createElement('div')
+    torrentBtn.innerText = this.i18n.t('downloadTorrentFile')
+    torrentBtn.className = 'ths nosel custom-btn'
+    torrentBtn.addEventListener(
+      'click',
+      () => {
+        const torrentLink = this.findTorrentLink()
+        if (torrentLink) torrentLink.click()
+        this.modalManager.closeModal()
+      },
+      false
+    )
 
     this.modalManager.openModal({
       maskClose: true,
       title: this.i18n.t('downloadSelectionTitle'),
       content: this.i18n.t('downloadSelectionContent', { torrentCount }),
       footer: [imageBtn, torrentBtn]
-    });
+    })
   }
 
   /**
@@ -1308,8 +1368,8 @@ class ImageDownloader {
    * @returns {HTMLElement|null} 种子链接元素
    */
   findTorrentLink() {
-    const torrentLinks = Array.from(document.querySelectorAll(PAGE_DOM_SELECTORS.gallery.asidePane));
-    return torrentLinks.find(link => /torrent.*\d+/i.test(link.innerText));
+    const torrentLinks = Array.from(document.querySelectorAll(PAGE_DOM_SELECTORS.gallery.asidePane))
+    return torrentLinks.find(link => /torrent.*\d+/i.test(link.innerText))
   }
 
   /**
@@ -1321,18 +1381,18 @@ class ImageDownloader {
         downloadType: document.querySelector('input[name="download"]:checked')?.value || 'thumb',
         skipDownloaded: Utils.getCheckboxState('skip-downloaded'),
         downloadPath: Utils.getInputValue('download-path')
-      };
-      this.downloadFullImage();
-    });
-    
-    const cancelBtn = Utils.createButton(this.i18n.dt('cancel'), () => this.modalManager.closeModal());
+      }
+      this.downloadFullImage()
+    })
+
+    const cancelBtn = Utils.createButton(this.i18n.dt('cancel'), () => this.modalManager.closeModal())
 
     this.modalManager.openModal({
       maskClose: true,
       title: this.i18n.dt('downloadConfig'),
       content: this.createModalContent(),
       footer: [startBtn, cancelBtn]
-    });
+    })
   }
 
   /**
@@ -1340,13 +1400,19 @@ class ImageDownloader {
    * @returns {HTMLElement} 模态框内容元素
    */
   createModalContent() {
-    const content = document.createElement('div');
-    content.className = 'searchadv';
+    const content = document.createElement('div')
+    content.className = 'searchadv'
     content.innerHTML = `
       <div>
-        <div><label class="lc"><input name="download" value="thumb" checked type="radio"><span></span> ${this.i18n.dt('thumbDownload')}</label></div>
-        <div><label class="lc"><input name="download" value="full" type="radio"><span></span> ${this.i18n.dt('fullDownload')}</label></div>
-        <div><label class="lc"><input type="checkbox" id="skip-downloaded"><span></span> ${this.i18n.dt('skipDownloadedImages')}</label></div>
+        <div><label class="lc"><input name="download" value="thumb" checked type="radio"><span></span> ${this.i18n.dt(
+          'thumbDownload'
+        )}</label></div>
+        <div><label class="lc"><input name="download" value="full" type="radio"><span></span> ${this.i18n.dt(
+          'fullDownload'
+        )}</label></div>
+        <div><label class="lc"><input type="checkbox" id="skip-downloaded"><span></span> ${this.i18n.dt(
+          'skipDownloadedImages'
+        )}</label></div>
       </div>
 
       <div title="${this.i18n.dt('defaultPathTip')}">
@@ -1359,10 +1425,10 @@ class ImageDownloader {
       <div>
         <input type="text" id="download-path" placeholder="${this.i18n.dt('folderPlaceholder')}" style="width:220px" />
       </div>
-    `;
+    `
 
-    this.bindModalEvents(content);
-    return content;
+    this.bindModalEvents(content)
+    return content
   }
 
   /**
@@ -1371,116 +1437,124 @@ class ImageDownloader {
    */
   bindModalEvents(content) {
     setTimeout(() => {
-      const selectPathBtn = content.querySelector('#show-default-folder');
+      const selectPathBtn = content.querySelector('#show-default-folder')
       if (selectPathBtn) {
         selectPathBtn.addEventListener('click', e => {
-          e.preventDefault();
-          chrome.runtime.sendMessage({ type: 'DOWNLOAD_PATH' });
-        });
+          e.preventDefault()
+          chrome.runtime.sendMessage({ type: 'DOWNLOAD_PATH' })
+        })
       }
-    }, 0);
+    }, 0)
   }
 
   /**
    * 下载所有原图的主函数
    */
   async downloadFullImage() {
-    const pageTitle = document.querySelector(PAGE_DOM_SELECTORS.gallery.title)?.innerText || this.i18n.t('unknownGallery');
-    
+    const pageTitle =
+      document.querySelector(PAGE_DOM_SELECTORS.gallery.title)?.innerText || this.i18n.t('unknownGallery')
+
     const popup = this.modalManager.openModal({
       title: `${this.i18n.t('downloadAllImagesBtn')}：${pageTitle}`,
       content: true
-    });
+    })
 
-    const errorLinks = [];
-    const imageLinks = await this.collectImageLinks(popup);
-    
+    const errorLinks = []
+    const imageLinks = await this.collectImageLinks(popup)
+
     popup.appendContent(
       this.i18n.t('linksCollected', { 'imageLinks.size': imageLinks.size }),
       `<b>${this.i18n.t('startDownloadImages')}</b>`
-    );
+    )
 
-    const { downloadType, skipDownloaded, downloadPath } = this.downloadParams;
+    const { downloadType, skipDownloaded, downloadPath } = this.downloadParams
 
     // 依次下载每张图片
     for (const link of imageLinks) {
       try {
-        const pageDom = await Utils.fetchPageContent(link);
-        
+        const pageDom = await Utils.fetchPageContent(link)
+
         // 获取图片标题和文件名
-        const titleElement = Array.from(pageDom.querySelectorAll(PAGE_DOM_SELECTORS.imageView.title)).pop();
-        const titleText = titleElement?.innerText || this.i18n.t('unknownImage');
-        const fileName = titleText.split('::')[0].replace(/ /g, '') || this.i18n.t('unknownImage');
-        
+        const titleElement = Array.from(pageDom.querySelectorAll(PAGE_DOM_SELECTORS.imageView.title)).pop()
+        const titleText = titleElement?.innerText || this.i18n.t('unknownImage')
+        const fileName = titleText.split('::')[0].replace(/ /g, '') || this.i18n.t('unknownImage')
+
         // 生成唯一标识符
-        const key = new URL(link).pathname.replace('/s/', '').replace('/', '-') + '-' + downloadType;
-        
+        const key = new URL(link).pathname.replace('/s/', '').replace('/', '-') + '-' + downloadType
+
         // 检查图片是否已存在
         const isExist = await Utils.useDatabase({
           module: 'image',
           action: 'isImageExist',
           data: key
-        });
+        })
 
         // 判断是否跳过已下载图片
         if (isExist) {
           if (skipDownloaded) {
-            popup.appendContent(this.i18n.t('downloadingFile', { 
-              fileName: this.i18n.t('imageExistSkip', { fileName }) 
-            }));
-            continue;
+            const dom = this.i18n.t('downloadingFile', {
+              fileName: this.i18n.t('imageExistSkip', { fileName })
+            })
+            popup.appendContent(`<small>${dom}</small>`)
+            continue
           } else {
-            popup.appendContent(this.i18n.t('downloadingFile', { 
-              fileName: this.i18n.t('imageExist', { fileName }) 
-            }));
+            const dom = this.i18n.t('downloadingFile', {
+              fileName: this.i18n.t('imageExist', { fileName })
+            })
+            popup.appendContent(`<small>${dom}</small>`)
           }
         } else {
-          popup.appendContent(this.i18n.t('downloadingFile', { fileName }));
+          const dom = this.i18n.t('downloadingFile', { fileName })
+          popup.appendContent(`<small>${dom}</small>`)
         }
 
         // 获取图片URL
-        let imageUrl;
+        let imageUrl
         if (downloadType === 'full') {
           // 原图下载逻辑
-          imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageUrl)?.href;
+          imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageUrl)?.href
         } else {
           // 缩略图下载逻辑
-          imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageThumb)?.src;
+          imageUrl = pageDom.querySelector(PAGE_DOM_SELECTORS.imageView.imageThumb)?.src
         }
 
         if (!imageUrl) {
-          throw new Error(this.i18n.t('originalImageLinkNotFound'));
+          throw new Error(this.i18n.t('originalImageLinkNotFound'))
         }
 
         // 发送下载请求
         chrome.runtime.sendMessage({
           type: 'DOWNLOAD',
           payload: { url: imageUrl, filename: fileName, filepath: downloadPath || pageTitle }
-        });
+        })
 
         // 记录到数据库
         await Utils.useDatabase({
           module: 'image',
           action: 'createImage',
           data: { id: key, name: fileName, link: link }
-        });
+        })
 
         // 控制下载速度
-        await Utils.asyncTimeout(1000);
+        await Utils.asyncTimeout(1000)
       } catch (error) {
-        errorLinks.push(link);
-        popup.appendContent(this.i18n.t('downloadFailed', { 
-          link: link, 
-          'error.message': error.message 
-        }));
+        errorLinks.push(link)
+        popup.appendContent(
+          this.i18n.t('downloadFailed', {
+            link: link,
+            'error.message': error.message
+          })
+        )
       }
     }
 
     // 显示下载结果
     if (errorLinks.length > 0) {
-      popup.appendContent(`<b>${this.i18n.t('partialDownloadComplete', { 'errorLinks.length': errorLinks.length })}</b>`);
+      popup.appendContent(
+        `<b>${this.i18n.t('partialDownloadComplete', { 'errorLinks.length': errorLinks.length })}</b>`
+      )
     } else {
-      popup.appendContent(`<b>${this.i18n.t('allDownloadComplete')}</b>`);
+      popup.appendContent(`<b>${this.i18n.t('allDownloadComplete')}</b>`)
     }
   }
 
@@ -1490,42 +1564,42 @@ class ImageDownloader {
    * @returns {Promise<Set>} 图片链接集合
    */
   async collectImageLinks(popup) {
-    const imageLinks = new Set();
-    
-    // 收集当前页链接
-    this.collectPageImageLinks(document, imageLinks);
-    
-    // 获取分页信息
-    const paginationBox = document.querySelector(PAGE_DOM_SELECTORS.gallery.topNav);
-    if (!paginationBox) return imageLinks;
+    const imageLinks = new Set()
 
-    const baseUri = `${location.origin}${location.pathname}`;
-    const totalPages = parseInt(Array.from(paginationBox.querySelectorAll('td')).slice(-2)[0]?.innerText || '1', 10);
+    // 收集当前页链接
+    this.collectPageImageLinks(document, imageLinks)
+
+    // 获取分页信息
+    const paginationBox = document.querySelector(PAGE_DOM_SELECTORS.gallery.topNav)
+    if (!paginationBox) return imageLinks
+
+    const baseUri = `${location.origin}${location.pathname}`
+    const totalPages = parseInt(Array.from(paginationBox.querySelectorAll('td')).slice(-2)[0]?.innerText || '1', 10)
     let currentPage = parseInt(
       paginationBox.querySelector(PAGE_DOM_SELECTORS.gallery.currentPage)?.querySelector('a')?.innerText || '0',
       10
-    );
+    )
 
     popup.appendContent(
       `<b>${this.i18n.t('collectingLinks')}</b>`,
       this.i18n.t('startFromPage', { currentPage, totalPages })
-    );
+    )
 
     // 遍历所有分页收集链接
     for (; currentPage < totalPages; currentPage++) {
-      const pageUrl = `${baseUri}?p=${currentPage}`;
+      const pageUrl = `${baseUri}?p=${currentPage}`
       popup.appendContent(
-        `${this.i18n.t('collectingPage', { currentPage })} <a target='_blank' href='${pageUrl}'>${
-          this.i18n.t('viewPage')
-        }</a>`
-      );
+        `${this.i18n.t('collectingPage', { currentPage })} <a target='_blank' href='${pageUrl}'>${this.i18n.t(
+          'viewPage'
+        )}</a>`
+      )
 
-      const pageDom = await Utils.fetchPageContent(pageUrl);
-      await Utils.asyncTimeout(500);
-      this.collectPageImageLinks(pageDom, imageLinks);
+      const pageDom = await Utils.fetchPageContent(pageUrl)
+      await Utils.asyncTimeout(500)
+      this.collectPageImageLinks(pageDom, imageLinks)
     }
 
-    return imageLinks;
+    return imageLinks
   }
 
   /**
@@ -1534,11 +1608,12 @@ class ImageDownloader {
    * @param {Set} linksSet - 存储链接的集合
    */
   collectPageImageLinks(dom, linksSet) {
-    dom.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)
+    dom
+      .querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)
       ?.querySelectorAll('a')
       ?.forEach(link => {
-        if (link.href) linksSet.add(link.href);
-      });
+        if (link.href) linksSet.add(link.href)
+      })
   }
 }
 
@@ -1547,21 +1622,22 @@ class ImageDownloader {
  */
 class AutoLoader {
   constructor() {
-    this.status = 'pending';
-    this.previewStyleInserted = false;
-    this.i18n = i18n; // 使用国际化服务
-    this.init();
+    this.status = 'pending'
+    this.previewStyleInserted = false
+    this.i18n = i18n // 使用国际化服务
+    this.init()
   }
 
   /**
    * 初始化自动加载功能
    */
   init() {
-    const shouldAutoLoad = PAGE_PATH_CONFIGS.AUTO_LOAD_PATHS
-      .some(pattern => new RegExp(pattern).test(location.pathname));
-    
+    const shouldAutoLoad = PAGE_PATH_CONFIGS.AUTO_LOAD_PATHS.some(pattern =>
+      new RegExp(pattern).test(location.pathname)
+    )
+
     if (shouldAutoLoad) {
-      this.initAutoLoad();
+      this.initAutoLoad()
     }
   }
 
@@ -1570,26 +1646,28 @@ class AutoLoader {
    * @param {number} threshold - 触发加载的滚动阈值（像素），默认1000
    */
   initAutoLoad(threshold = 1000) {
-    let isProcessing = false;
-    const currentPath = location.pathname;
+    let isProcessing = false
+    const currentPath = location.pathname
 
     window.addEventListener('scroll', () => {
       if (!isProcessing && this.status === 'pending') {
         window.requestAnimationFrame(() => {
           if (new RegExp('^/g/').test(currentPath)) {
-            this.autoLoadGalleryList();
+            this.autoLoadGalleryList()
           } else if (new RegExp('^/s/').test(currentPath)) {
-            this.autoLoadImagePage();
+            this.autoLoadImagePage()
           } else {
-            this.autoLoadHomePage();
+            this.autoLoadHomePage()
           }
 
-          setTimeout(() => { isProcessing = false; }, 300);
-        });
+          setTimeout(() => {
+            isProcessing = false
+          }, 300)
+        })
 
-        isProcessing = true;
+        isProcessing = true
       }
-    });
+    })
   }
 
   /**
@@ -1598,64 +1676,64 @@ class AutoLoader {
    * @returns {HTMLElement|null} 状态消息元素
    */
   checkScrollCondition(paginationBox) {
-    if (!paginationBox) return null;
+    if (!paginationBox) return null
 
-    const distanceToBottom = paginationBox.getBoundingClientRect().y - document.documentElement.clientHeight;
-    if (distanceToBottom > 1000) return null;
+    const distanceToBottom = paginationBox.getBoundingClientRect().y - document.documentElement.clientHeight
+    if (distanceToBottom > 1000) return null
 
-    let statusMessage = document.querySelector('#page-message');
+    let statusMessage = document.querySelector('#page-message')
     if (!statusMessage) {
-      statusMessage = document.createElement('p');
-      statusMessage.id = 'page-message';
-      statusMessage.style.textAlign = 'center';
-      paginationBox?.parentNode?.insertBefore(statusMessage, paginationBox);
+      statusMessage = document.createElement('p')
+      statusMessage.id = 'page-message'
+      statusMessage.style.textAlign = 'center'
+      paginationBox?.parentNode?.insertBefore(statusMessage, paginationBox)
     }
 
-    return statusMessage;
+    return statusMessage
   }
 
   /**
    * 自动加载首页内容
    */
   async autoLoadHomePage() {
-    const paginationBox = document.querySelectorAll(PAGE_DOM_SELECTORS.home.searchNav)?.[1];
-    const statusMessage = this.checkScrollCondition(paginationBox);
+    const paginationBox = document.querySelectorAll(PAGE_DOM_SELECTORS.home.searchNav)?.[1]
+    const statusMessage = this.checkScrollCondition(paginationBox)
 
-    if (!statusMessage) return;
+    if (!statusMessage) return
 
-    const nextPageLink = document.querySelector(PAGE_DOM_SELECTORS.home.bottomNext)?.href;
+    const nextPageLink = document.querySelector(PAGE_DOM_SELECTORS.home.bottomNext)?.href
     if (!nextPageLink) {
-      this.status = 'non';
-      statusMessage.innerText = this.i18n.t('allContentLoaded');
-      return;
+      this.status = 'non'
+      statusMessage.innerText = this.i18n.t('allContentLoaded')
+      return
     }
 
     try {
-      this.status = 'loading';
-      statusMessage.innerText = this.i18n.t('loadingNextPage');
+      this.status = 'loading'
+      statusMessage.innerText = this.i18n.t('loadingNextPage')
 
-      const nextPageDom = await Utils.fetchPageContent(nextPageLink);
-      
+      const nextPageDom = await Utils.fetchPageContent(nextPageLink)
+
       // 更新分页导航
-      const newPagination = nextPageDom.querySelectorAll(PAGE_DOM_SELECTORS.home.searchNav)?.[1];
+      const newPagination = nextPageDom.querySelectorAll(PAGE_DOM_SELECTORS.home.searchNav)?.[1]
       if (newPagination) {
-        paginationBox.innerHTML = newPagination.innerHTML;
+        paginationBox.innerHTML = newPagination.innerHTML
       }
 
       // 添加新内容
-      const newContent = nextPageDom.querySelector(PAGE_DOM_SELECTORS.home.contentBody)?.children;
+      const newContent = nextPageDom.querySelector(PAGE_DOM_SELECTORS.home.contentBody)?.children
       if (newContent) {
-        document.querySelector(PAGE_DOM_SELECTORS.home.contentBody)?.append(...newContent);
+        document.querySelector(PAGE_DOM_SELECTORS.home.contentBody)?.append(...newContent)
       }
 
       if (this.status === 'loading') {
-        this.status = 'pending';
-        statusMessage.innerText = this.i18n.t('scrollToLoadMore');
+        this.status = 'pending'
+        statusMessage.innerText = this.i18n.t('scrollToLoadMore')
       }
     } catch (error) {
-      console.error('Auto load failed:', error);
-      this.status = 'error';
-      statusMessage.innerText = this.i18n.t('loadFailedRetry');
+      console.error('Auto load failed:', error)
+      this.status = 'error'
+      statusMessage.innerText = this.i18n.t('loadFailedRetry')
     }
   }
 
@@ -1663,42 +1741,42 @@ class AutoLoader {
    * 自动加载画廊列表页内容
    */
   async autoLoadGalleryList() {
-    const paginationBox = document.querySelector(PAGE_DOM_SELECTORS.gallery.bottomNav);
-    const statusMessage = this.checkScrollCondition(paginationBox);
+    const paginationBox = document.querySelector(PAGE_DOM_SELECTORS.gallery.bottomNav)
+    const statusMessage = this.checkScrollCondition(paginationBox)
 
-    if (!statusMessage) return;
+    if (!statusMessage) return
 
-    const nextPageLink = paginationBox.querySelectorAll('td:last-child')?.[0]?.querySelector('a')?.href;
+    const nextPageLink = paginationBox.querySelectorAll('td:last-child')?.[0]?.querySelector('a')?.href
     if (!nextPageLink) {
-      this.status = 'non';
-      statusMessage.innerText = this.i18n.t('allContentLoaded');
-      return;
+      this.status = 'non'
+      statusMessage.innerText = this.i18n.t('allContentLoaded')
+      return
     }
 
     try {
-      this.status = 'loading';
-      statusMessage.innerText = this.i18n.t('loadingNextPage');
+      this.status = 'loading'
+      statusMessage.innerText = this.i18n.t('loadingNextPage')
 
-      const nextPageDom = await Utils.fetchPageContent(nextPageLink);
-      
+      const nextPageDom = await Utils.fetchPageContent(nextPageLink)
+
       // 更新分页导航
-      paginationBox.innerHTML = nextPageDom.querySelector(PAGE_DOM_SELECTORS.gallery.bottomNav).innerHTML;
+      paginationBox.innerHTML = nextPageDom.querySelector(PAGE_DOM_SELECTORS.gallery.bottomNav).innerHTML
 
       // 添加新图片到列表
-      const newImages = nextPageDom.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)?.children;
+      const newImages = nextPageDom.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)?.children
       if (newImages) {
-        const contentContainer = document.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer);
-        Array.from(newImages).forEach(child => contentContainer.appendChild(child));
+        const contentContainer = document.querySelector(PAGE_DOM_SELECTORS.gallery.contentContainer)
+        Array.from(newImages).forEach(child => contentContainer.appendChild(child))
       }
 
       if (this.status === 'loading') {
-        this.status = 'pending';
-        statusMessage.innerText = this.i18n.t('scrollToLoadMore');
+        this.status = 'pending'
+        statusMessage.innerText = this.i18n.t('scrollToLoadMore')
       }
     } catch (error) {
-      console.error('Auto load failed:', error);
-      this.status = 'error';
-      statusMessage.innerText = this.i18n.t('loadFailedRetry');
+      console.error('Auto load failed:', error)
+      this.status = 'error'
+      statusMessage.innerText = this.i18n.t('loadFailedRetry')
     }
   }
 
@@ -1706,67 +1784,67 @@ class AutoLoader {
    * 自动加载图片查看页
    */
   async autoLoadImagePage() {
-    const paginationBoxes = document.querySelectorAll(PAGE_DOM_SELECTORS.imageView.navBar);
-    if (paginationBoxes.length < 2) return;
+    const paginationBoxes = document.querySelectorAll(PAGE_DOM_SELECTORS.imageView.navBar)
+    if (paginationBoxes.length < 2) return
 
-    const statusMessage = this.checkScrollCondition(paginationBoxes[1]);
-    if (!statusMessage) return;
+    const statusMessage = this.checkScrollCondition(paginationBoxes[1])
+    if (!statusMessage) return
 
     const [currentPage, totalPages] = Array.from(
       document.querySelector(PAGE_DOM_SELECTORS.imageView.pageNumber).querySelectorAll('span')
-    ).map(span => span.innerText);
+    ).map(span => span.innerText)
 
     if (currentPage === totalPages) {
-      this.status = 'non';
-      statusMessage.innerText = this.i18n.t('allImagesLoaded');
-      return;
+      this.status = 'non'
+      statusMessage.innerText = this.i18n.t('allImagesLoaded')
+      return
     }
 
-    const nextPageLink = paginationBoxes[1].querySelector(PAGE_DOM_SELECTORS.imageView.nextButton)?.href;
+    const nextPageLink = paginationBoxes[1].querySelector(PAGE_DOM_SELECTORS.imageView.nextButton)?.href
     if (!nextPageLink) {
-      throw new Error(this.i18n.t('nextPageLinkNotFound'));
+      throw new Error(this.i18n.t('nextPageLinkNotFound'))
     }
 
     try {
-      this.status = 'loading';
-      statusMessage.innerText = this.i18n.t('loadingNextImage');
+      this.status = 'loading'
+      statusMessage.innerText = this.i18n.t('loadingNextImage')
 
-      const nextPageDom = await Utils.fetchPageContent(nextPageLink);
-      
+      const nextPageDom = await Utils.fetchPageContent(nextPageLink)
+
       // 更新分页信息
-      const newPagination = nextPageDom.querySelector(PAGE_DOM_SELECTORS.imageView.navBar);
-      paginationBoxes.forEach(box => box.innerHTML = newPagination.innerHTML);
+      const newPagination = nextPageDom.querySelector(PAGE_DOM_SELECTORS.imageView.navBar)
+      paginationBoxes.forEach(box => (box.innerHTML = newPagination.innerHTML))
 
       // 添加新图片内容
-      const contentContainer = document.querySelector(PAGE_DOM_SELECTORS.imageView.contentContainer);
-      const newContent = nextPageDom.querySelector(PAGE_DOM_SELECTORS.imageView.contentContainer).firstChild;
-      contentContainer.appendChild(newPagination.nextElementSibling);
-      contentContainer.appendChild(newContent);
+      const contentContainer = document.querySelector(PAGE_DOM_SELECTORS.imageView.contentContainer)
+      const newContent = nextPageDom.querySelector(PAGE_DOM_SELECTORS.imageView.contentContainer).firstChild
+      contentContainer.appendChild(newPagination.nextElementSibling)
+      contentContainer.appendChild(newContent)
 
       // 添加预览样式（仅一次）
       if (!this.previewStyleInserted) {
-        const style = document.createElement('style');
-        style.textContent = `#i3 > div {color: #222;}`;
-        document.head.appendChild(style);
-        this.previewStyleInserted = true;
+        const style = document.createElement('style')
+        style.textContent = `#i3 > div {color: #222;}`
+        document.head.appendChild(style)
+        this.previewStyleInserted = true
       }
 
       if (this.status === 'loading') {
-        this.status = 'pending';
-        statusMessage.innerText = this.i18n.t('scrollToLoadMore');
+        this.status = 'pending'
+        statusMessage.innerText = this.i18n.t('scrollToLoadMore')
       }
     } catch (error) {
-      console.error('Auto load failed:', error);
-      this.status = 'error';
-      statusMessage.innerText = this.i18n.t('loadFailedRetry');
+      console.error('Auto load failed:', error)
+      this.status = 'error'
+      statusMessage.innerText = this.i18n.t('loadFailedRetry')
     }
   }
 }
 
 // 创建模态框管理器实例
-const modalManager = new ModalManager();
+const modalManager = new ModalManager()
 
 // 初始化各个功能模块
-new TorrentDownloader(modalManager);
-new ImageDownloader(modalManager);
-new AutoLoader();
+new TorrentDownloader(modalManager)
+new ImageDownloader(modalManager)
+new AutoLoader()
