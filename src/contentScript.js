@@ -166,7 +166,7 @@ const TEXT_DOWNLOAD_OPTIONS = {
 
     // Download record management
     skipDownloaded: 'Skip downloaded torrents',
-    stopDownloaded: 'Stop downloads when encountering downloaded torrents',
+    stopDownloaded: 'Abort downloads on downloaded torrents',
     clearDownloaded: 'Clear download records',
     clearDownloadedConfirm:
       '【Skip downloaded torrents】 depends on this data,\nare you sure you want to clear the download records?',
