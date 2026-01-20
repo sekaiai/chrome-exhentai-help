@@ -118,8 +118,7 @@ const TEXT_DOWNLOAD_OPTIONS = {
     pages: '页',
 
     // 停止条件选项
-    stopAtTorrentTitle:
-      '下载到该画廊结束任务\n不包括该画廊\n直接填写画廊链接\n例: https://exhentai.org/g/2426870/5c9b316fef/',
+    stopAtTorrentTitle: '下载到该画廊结束任务\n不包括该画廊\n填写画廊链接',
     stopAtTorrentLabel: '下载到',
     stopAtTorrentEnd: '结束',
 
@@ -160,7 +159,7 @@ const TEXT_DOWNLOAD_OPTIONS = {
     pages: 'pages',
 
     // Stop condition options
-    stopAtTorrentTitle: 'Stop all downloads upon this gallery\nExample: https://exhentai.org/g/2426870/5c9b316fef/',
+    stopAtTorrentTitle: 'Stop all downloads upon this gallery',
     stopAtTorrentLabel: 'Stop at',
     stopAtTorrentEnd: 'end',
 
@@ -533,10 +532,17 @@ class ModalManager {
     return this.popup
   }
 
+  getElementBgColor(selector) {
+    const element = document.querySelector(selector)
+    if (!element) return null
+    return window.getComputedStyle(element).backgroundColor
+  }
+
   /**
    * 创建模态框基本结构
    */
   createModalStructure() {
+    const bgColor = this.getElementBgColor('.ido') || this.getElementBgColor('#gdt') || '#363940'
     const overlay = document.createElement('div')
     overlay.style = `
       background: rgba(0,0,0,.7);
@@ -552,7 +558,7 @@ class ModalManager {
     modalBody.id = 'popup-body'
     modalBody.style = `
       position: absolute;
-      background: #363940;
+      background: ${bgColor};
       border-radius: 8px;
       z-index: 10000;
       padding: 14px 20px;
@@ -564,7 +570,6 @@ class ModalManager {
       top: 30%;
       transform: translate(-50%, -30%);
       text-align: left;
-      color: #fff;
     `
 
     // 阻止模态框内部点击事件冒泡到遮罩
@@ -595,7 +600,7 @@ class ModalManager {
   addTitle(title) {
     this.popup.title = document.createElement('h3')
     this.popup.title.style.margin = '0 0 15px 0'
-    this.popup.title.style.color = '#fff'
+    // this.popup.title.style.color = '#fff'
 
     if (typeof title === 'string') {
       this.popup.title.innerHTML = title
@@ -616,7 +621,6 @@ class ModalManager {
       padding-bottom: 20px;
       overflow-y: auto;
       max-height: 60vh;
-      color: #ddd;
     `
 
     if (typeof content === 'string') {
@@ -796,14 +800,14 @@ class TorrentDownloader {
           'maxDownloads'
         )} <input type="text" id="max-downloads" size="4" maxlength="4"/> ${this.i18n.dt('torrents')}</div>
         <div>${this.i18n.dt('maxPages')} <input type="text" id="max-pages" size="4" maxlength="4" /> ${this.i18n.dt(
-      'pages'
-    )}</div>
+          'pages'
+        )}</div>
         <div title="${this.i18n.dt('stopAtTorrentTitle')}">
           ${this.i18n.dt(
             'stopAtTorrentLabel'
           )} <input type="text" id="stop-at-torrent" placeholder="url" style="width:60px" /> ${this.i18n.dt(
-      'stopAtTorrentEnd'
-    )}
+            'stopAtTorrentEnd'
+          )}
         </div>
       </div>
 
@@ -818,8 +822,8 @@ class TorrentDownloader {
 
       <div>
         ${this.i18n.dt('downloadedCount')} <span id="downloaded-count">${downloadedCount}</span> ${this.i18n.dt(
-      'torrentsCount'
-    )}. 
+          'torrentsCount'
+        )}. 
         [<a href="javascript:void(0);" id="clear-downloaded">${this.i18n.dt('clearDownloaded')}</a>]
       </div>
 
