@@ -111,4 +111,4 @@ function handleMessage(request, sender, sendResponse) {
 
 // 注册事件监听器
 chrome.runtime.onMessage.addListener(handleMessage)
-chrome.action.onClicked.addListener(() => chrome.tabs.create({ url: 'https://exhentai.org/' }))
+// chrome.action.onClicked.addListener(() => chrome.tabs.create({ url: 'https://exhentai.org/' }))
