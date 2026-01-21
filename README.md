@@ -8,9 +8,10 @@
 ## 安装方式
 ### 1. Chrome 商店安装（需登录 Chrome商店）
 官方链接：http://chromewebstore.google.com/detail/chrome-exhentai-help/dpnkmdlkpcgckdjolnddjgnahcagjlmd
+或搜索 exhentai
 
 ### 2. 手动安装
-1. 下载安装包：访问 https://github.com/sekaiai/chrome-exhentai-help/releases，下载 `chrome-exhentai-help.zip` 压缩包；
+1. 下载安装包：访问 [https://github.com/sekaiai/chrome-exhentai-help/releases](https://github.com/sekaiai/chrome-exhentai-help/releases)，下载 `chrome-exhentai-help.zip` 压缩包；
 2. 解压压缩包，得到 `build` 文件夹（可重命名）；
 3. 打开 Chrome 扩展管理页：输入 `chrome://extensions/` 或通过「菜单→更多工具→扩展程序」进入；
 4. 开启右上角「开发者模式」；
