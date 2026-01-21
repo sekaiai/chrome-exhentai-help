@@ -1,8 +1,9 @@
-name: Build and Package Extension
+name: Build, Package and Release Extension
 
 on:
   push:
     branches: [ main, master ]
+    tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ main, master ]
   release:
@@ -39,7 +40,30 @@ jobs:
         name: chrome-exhentai-help
         path: chrome-exhentai-help.zip
 
-    - name: Upload release asset
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      id: create_release
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+
+    - name: Upload release asset (on tag push)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./chrome-exhentai-help.zip
+        asset_name: chrome-exhentai-help-${{ github.ref_name }}.zip
+        asset_content_type: application/zip
+
+    - name: Upload release asset (on release publish)
       if: github.event_name == 'release'
       uses: actions/upload-release-asset@v1
       env:
