@@ -1,75 +1,50 @@
-name: Build, Package and Release Extension
+name: Auto Release Extension
 
+# 仅在推送到主分支时触发自动发布
 on:
   push:
     branches: [ main, master ]
-    tags: [ 'v*.*.*' ]
-  pull_request:
-    branches: [ main, master ]
-  release:
-    types: [ published ]
 
 jobs:
-  build:
+  auto-release:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write  # 授予发布所需的权限
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      # 1. 拉取代码
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
+      # 2. 配置 Node.js 环境
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
 
-    - name: Install dependencies
-      run: npm install
+      # 3. 安装依赖并构建扩展
+      - name: Install dependencies & build
+        run: |
+          npm install
+          npm run build
 
-    - name: Build extension
-      run: npm run build
+      # 4. 打包扩展文件
+      - name: Package extension
+        run: zip -r chrome-exhentai-help.zip dist/
 
-    - name: Package extension
-      run: |
-        mkdir -p dist
-        zip -r chrome-exhentai-help.zip dist/
+      # 5. 自动生成版本号（格式：v1.0.${运行编号}，运行编号递增且唯一）
+      - name: Generate auto version
+        id: generate_version
+        run: echo "VERSION=v1.0.${{ github.run_number }}" >> $GITHUB_ENV
 
-    - name: Upload build artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: chrome-exhentai-help
-        path: chrome-exhentai-help.zip
-
-    - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      id: create_release
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-
-    - name: Upload release asset (on tag push)
-      if: startsWith(github.ref, 'refs/tags/')
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./chrome-exhentai-help.zip
-        asset_name: chrome-exhentai-help-${{ github.ref_name }}.zip
-        asset_content_type: application/zip
-
-    - name: Upload release asset (on release publish)
-      if: github.event_name == 'release'
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./chrome-exhentai-help.zip
-        asset_name: chrome-exhentai-help-${{ github.event.release.tag_name }}.zip
-        asset_content_type: application/zip
+      # 6. 自动发布（创建 Release + 上传打包文件）
+      - name: Auto release with asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}  # 使用自动生成的版本号作为标签
+          name: Release ${{ env.VERSION }}  # Release 名称
+          files: chrome-exhentai-help.zip  # 要上传的包文件
+          draft: false  # 不创建草稿
+          prerelease: false  # 非预发布版本
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # GitHub 内置令牌，无需手动配置
