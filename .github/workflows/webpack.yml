@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
           cache: 'npm'
 
       # 3. 安装依赖并构建扩展
@@ -30,7 +30,7 @@ jobs:
 
       # 4. 打包扩展文件
       - name: Package extension
-        run: zip -r chrome-exhentai-help.zip dist/
+        run: zip -r chrome-exhentai-help.zip build/
 
       # 5. 自动生成版本号（格式：v1.0.${运行编号}，运行编号递增且唯一）
       - name: Generate auto version
